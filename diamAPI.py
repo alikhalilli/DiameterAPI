@@ -306,56 +306,6 @@ class AVPType:
         pass
 
 
-class Integer32:
-    @staticmethod
-    def decode(val):
-        # Integer32 => 4 bytes
-        return struct.unpack('>I', unhexlify(val)[0])[0]
-
-    @staticmethod
-    def encode(val):
-        # Integer32 => 4 bytes
-        return hexlify(struct.pack('>I', val))[0]
-
-    @staticmethod
-    def getAVPLen(vFlag=False):
-        # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
-        return 12 if vFlag else 16
-
-    @staticmethod
-    def getTypeLen():
-        return 32
-
-    @staticmethod
-    def getPadding():
-        return 0
-
-
-class Integer64:
-    @staticmethod
-    def decode(val):
-        # Integer64 => 8 bytes
-        return struct.unpack('>I', val.decode("utf-8"))
-
-    @staticmethod
-    def encode(val):
-        # Integer32 => 4 bytes
-        return struct.pack('>I', val.encode("utf-8"))
-
-    @staticmethod
-    def getAVPLen(vFlag=False):
-        # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
-        return 16 if vFlag else 20
-
-    @staticmethod
-    def getTypeLen():
-        return 32
-
-    @staticmethod
-    def getPadding():
-        return 0
-
-
 class OctetString:
     @staticmethod
     def encode(val, vFlag=False):
