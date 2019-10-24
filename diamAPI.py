@@ -277,7 +277,10 @@ class AVPRepo:
 
     @staticmethod
     def getTypeByName(name):
-        return avpDict[name]['typename']
+        try:
+            return avpDict[name]['typename']
+        except KeyError:
+            print("AVP Not Found")
 
     @staticmethod
     def isEnum(name):
@@ -285,6 +288,16 @@ class AVPRepo:
 
 
 print(AVPRepo.getCodeByName('Management-Policy-Id'))
+
+
+class AVPType:
+    @staticmethod
+    def encode(val, type):
+        pass
+
+    @staticmethod
+    def decode(val):
+        pass
 
 
 class Integer32:
@@ -377,5 +390,5 @@ def new_calc_padding(msg_len):
 0x
 """
 
-print(AVP("Origin-Host", b"pcrf.myrealm.example"))
+print(AVP("Origin-Hos", b"pcrf.myrealm.example"))
 print(AVP("Origin-Host", b"pcrf.myrealm.example").encode())
