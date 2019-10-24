@@ -244,7 +244,10 @@ class AVPRepo:
 
     @staticmethod
     def getCodeByName(name):
-        return avpDict[name]['code']
+        try:
+            return avpDict[name]['code']
+        except KeyError:
+            print('AVP Not Found')
 
     @staticmethod
     def getNameByCode(code):
