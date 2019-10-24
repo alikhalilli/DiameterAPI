@@ -1,4 +1,4 @@
-from static import commandDict
+from static import commandDict, vendorDict
 
 
 class Command:
