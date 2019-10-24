@@ -155,9 +155,6 @@ class AVP:
         AVPType: {self.datatype}"""
 
 
-
-
-
 class AVPRepo:
     """
     'code': '60',
