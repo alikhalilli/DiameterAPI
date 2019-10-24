@@ -5,11 +5,7 @@ import sys
 import logging
 import time
 import string
-import xml.dom.minidom as minidom
 from static import avpDict, commandDict, vendorDict
-from codecs import getencoder, getdecoder
-
-hexlify, unhexlify = getencoder('hex'), getdecoder('hex')
 
 """
 Package Header Flags:
@@ -159,79 +155,7 @@ class AVP:
         AVPType: {self.datatype}"""
 
 
-xml_dictionary = minidom.parse(
-    '/Users/akhalilli/gitrepos/diamAPI/dictionary.xml').documentElement
-dict_avps = xml_dictionary.getElementsByTagName("avp")
-dict_vendors = xml_dictionary.getElementsByTagName("vendor")
-dict_commands = xml_dictionary.getElementsByTagName("command")
 
-
-avpDict = {}
-for avpItem in dict_avps:
-    avpDict[avpItem.getAttribute('name')] = dict(
-        code=avpItem.getAttribute('code'),
-        mandatory=avpItem.getAttribute('mandatory'),
-        mayencrypt=avpItem.getAttribute('may-encrypt'),
-        protected=avpItem.getAttribute('protected'),
-        vendorbit=avpItem.getAttribute('vendor-bit'),
-        vendorid=avpItem.getAttribute('vendor-id')
-    )
-    for typedef in avpItem.getElementsByTagName('type'):
-        avpDict[avpItem.getAttribute('name')].update(
-            dict(typename=typedef.getAttribute('type-name')))
-        if typedef.getAttribute('type-name') == 'Enumerated':
-            avpDict[avpItem.getAttribute('name')]['enumList'] = []
-            enumInfo = {}
-            for enumItem in avpItem.getElementsByTagName('enum'):
-                enumInfo = {'name': enumItem.getAttribute('name'),
-                            'code': enumItem.getAttribute('code')}
-                avpDict[avpItem.getAttribute(
-                    'name')]['enumList'].append(enumInfo)
-# print(avpDict)
-
-
-class Vendor:
-    @staticmethod
-    def getCodeById(id):
-        return vendorDict[id]['code']
-
-    @staticmethod
-    def getNameById(id):
-        return vendorDict[id]['code']
-
-    @staticmethod
-    def getNameByCode(code):
-        for _, v in vendorDict.items():
-            if v['code'] == code:
-                return v['name']
-
-    @staticmethod
-    def getIdByCode(code):
-        for k, v in vendorDict.items():
-            if v['code'] == code:
-                return k
-
-
-class Command:
-    @staticmethod
-    def getCodeByName(name):
-        return commandDict[name]['code']
-
-    @staticmethod
-    def getVendorIDByName(name):
-        return commandDict[name]['vendor-id']
-
-    @staticmethod
-    def getNameByCode(code):
-        for k, v in commandDict.items():
-            if v['code'] == code:
-                return k
-
-    @staticmethod
-    def getVendorIDByCode(code):
-        for _, v in vendorDict.items():
-            if v['code'] == code:
-                return v['vendor-id']
 
 
 class AVPRepo:
@@ -294,16 +218,6 @@ class AVPRepo:
 
 
 print(AVPRepo.getCodeByName('Management-Policy-Id'))
-
-
-class AVPType:
-    @staticmethod
-    def encode(val, type):
-        pass
-
-    @staticmethod
-    def decode(val):
-        pass
 
 
 class OctetString:
