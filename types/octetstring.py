@@ -1,6 +1,6 @@
 import struct
 from binascii import hexlify, unhexlify
-
+from calcpad import get_paddingc
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -28,7 +28,7 @@ class OctetString:
     @staticmethod
     def decode(val):
         # Size is dynamic
-        return struct.unpack(f'>{len(val)//2-8}s', unhexlify(val)[8:])[0]
+        return struct.unpack(f'>{len(val)//2}s', unhexlify(val))[0]
 
     @staticmethod
     def encode(val):
@@ -45,9 +45,6 @@ class OctetString:
         return 12 + len(data)/2 if vFlag else 8 + len(data)/2
 
     @staticmethod
-    def getTypeLen():
-        return 8
-
-    @staticmethod
-    def getPaddingC():
-        return 0
+    def getPaddingC(val):
+        n = len(val)
+        return get_paddingc(n) - n

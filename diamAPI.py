@@ -6,6 +6,7 @@ import logging
 import time
 import string
 from static import avpDict, commandDict, vendorDict
+from .types.calcpad import get_paddingc
 
 """
 Package Header Flags:
@@ -217,39 +218,7 @@ class AVPRepo:
 print(AVPRepo.getCodeByName('Management-Policy-Id'))
 
 
-class OctetString:
-    @staticmethod
-    def encode(val, vFlag=False):
-        m = 12 if vFlag else 8
-        return (hexlify(struct.pack(f'>{len(val)}s', val))[0], m)
 
-    @staticmethod
-    def decode(val, vFlag=False):
-        m = 12 if vFlag else 8
-        return struct.unpack(f'>s{len(val)-m}', val.decode("utf-8"))
-
-    @staticmethod
-    def getTypeLen(val):
-        return len(val)
-
-    @staticmethod
-    def getPadding(val):
-        pass
-
-
-class DiameterIdentity(OctetString):
-    pass
-
-
-def get_paddingc(msg_len):
-    if msg_len % 4 == 0:
-        return msg_len
-    else:
-        return 4-msg_len % 4
-
-
-def new_calc_padding(msg_len):
-    return (msg_len + 3) & ~ 3
 
 
 """
