@@ -26,27 +26,44 @@ AVP_header_length = 12 bytes [4+1+3+4]
 
 
 class Integer32(Type):
-    @staticmethod
-    def decode(val):
+    def __init__(self, val):
+        self._value = val
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, val):
+        self._value = val
+
+    def decode(self):
         # Integer32 => 4 bytes
-        return struct.unpack('>I', unhexlify(val))
+        return struct.unpack('>I', unhexlify(self.value))
+
+    def encode(self):
+        # Integer32 => 4 bytes
+        return hexlify(struct.pack('>I', self.value.encode('utf-8'))).decode('utf-8')
 
     @staticmethod
-    def encode(val):
-        # Integer32 => 4 bytes
-        return hexlify(struct.pack('>I', val.encode('utf-8'))).decode('utf-8')
+    def getLength(self=None):
+        return 4
 
     @staticmethod
+    def getPaddingC(self=None):
+        return 0
+
+    def __repr__(self):
+        return f"""Value: {self.value}
+        Length: {self.getLength()}
+        Padding: {self.getPaddingC()}
+        Encoded: {self.encode()}"""
+
+
+""" @staticmethod
+
     def getAVPLen(vFlag=False):
         # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
         # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Int32)
         # 4 + 1 + 3 + [4] + 4 = 12 + [4]
-        return 12 if vFlag else 16
-
-    @staticmethod
-    def getTypeLen():
-        return 4
-
-    @staticmethod
-    def getPaddingC():
-        return 0
+        return 12 if vFlag else 16"""
