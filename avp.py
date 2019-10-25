@@ -27,14 +27,68 @@ avpflags = dict(
 
 
 class AVP:
-    def __init__(self, code, flags, vendor, data):
-        self.code = code
-        self.flags = flags
-        self.length = self.headerLength +
-        self.vendor = vendor
-        self.data = data
+    def __init__(self, code=None, flags=None, vendor=None, data=None):
+        self._code = code
+        self._flags = flags
+        self._length = self.headerLength + data.len()
+        self._vendor = vendor
+        self._data = data
 
     @property
     def headerLength(self):
-        if self.flags & avpflags['Vendor']:
-            return 
+        if self.vendor and (self.flags & avpflags['Vendor']):
+            return 12
+        return 8
+
+    @staticmethod
+    def newAVP(code, flags, vendor, data):
+        return AVP(code, flags, vendor, data)
+
+    @staticmethod
+    def decode(data, application):
+        a = AVP()
+        a.vendor = 'vendor'
+        return AVP
+
+    @property
+    def code(self):
+        return self._code
+
+    @code.setter
+    def code(self, val):
+        self._code = val
+
+    @property
+    def flags(self):
+        return self._flags
+
+    @flags.setter
+    def flags(self, val):
+        self._flags = val
+
+    @property
+    def vendor(self):
+        return self._vendor
+
+    @vendor.setter
+    def vendor(self, val):
+        self._vendor = val
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, val):
+        self._data = val
+
+    @property
+    def length(self):
+        return self._length
+
+    def __repr__(self):
+        return f"""Code: {self.code}
+        Flags: {self.flags}
+        Length: {self.length}
+        VendorID: {self.vendor}
+        Data: {self.data}"""

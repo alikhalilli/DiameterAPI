@@ -1,6 +1,6 @@
 import struct
 from binascii import hexlify, unhexlify
-
+from type import Type
 
 """
   0                   1                   2                   3
@@ -25,7 +25,7 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class Float32:
+class Float32(Type):
     @staticmethod
     def decode(val):
         # Float32 => 4 bytes
