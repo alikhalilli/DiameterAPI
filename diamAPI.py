@@ -69,27 +69,7 @@ Hop-By-Hop Identifier => 32 bits = 4 bytes
 End-to-End Identifier => 32 bits = 4 bytes
 """
 
-"""
-  0                   1                   2                   3
-  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |                           AVP Code                            |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |V M P r r r r r|                  AVP Length                   |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |                        Vendor-ID (opt)                        |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |    Data ...
-  +-+-+-+-+-+-+-+-+
 
-  AVP Code => 32 bits = 4 bytes [0xffffffff]
-  AVP Flags => 8 bits = 1 bytes [0xff]
-  AVP Length => 24 bits = 3 bytes [0xffffff]
-  AVP VendorID => 32 bits = 4 bytes [0xffffffff]
-
-4 octets = 32 bytes
-AVP_header_length = 12 bytes [4+1+3+4]
-"""
 
 
 class DiameterHeader:
@@ -143,7 +123,6 @@ class AVP:
             avpsequence = ''
             for aval in self.val:
                 avpsequence += (aval + get_paddingc(len(aval)/2) * '00')
-
         self._data = AVPRepo.getAllDetailsByName(self.AVPname)
         encoded, m = globals()[self.datatype].encode(self.val)
         self._AVPlength = m + len(encoded)/2
@@ -216,9 +195,6 @@ class AVPRepo:
 
 
 print(AVPRepo.getCodeByName('Management-Policy-Id'))
-
-
-
 
 
 """
