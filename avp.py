@@ -1,5 +1,7 @@
 import struct
 from binascii import hexlify, unhexlify
+from integer32 import Integer32
+
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -32,14 +34,17 @@ class AVP:
     def __init__(self, code=None, flags=None, vendor=None, data=None):
         self._code = code
         self._flags = flags
-        self._length = self.headerLength + data.getLength()
         self._vendor = vendor
+        self._length = self.headerLength + data.getLength()
+        print(self._length)
         self._data = data
+        self._padding = data.getPaddingC()
 
     @property
     def headerLength(self):
-        if self.vendor and (self.flags & avpflags['Vendor']):
-            return 12
+        if self.vendor:
+            if (self.flags & avpflags['Vendor']):
+                return 12
         return 8
 
     @staticmethod
@@ -47,7 +52,17 @@ class AVP:
         return AVP(code, flags, vendor, data)
 
     def encode(self):
-        pass
+        encoded = bytearray()
+        encoded[0:] = struct.pack('>I', self.code)  # 0, 1, 2, 3
+        encoded[4:] = struct.pack('>B', self.flags)  # 4
+        encoded[5:] = struct.pack('>I', self.length)[
+            1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
+        encoded[8:] = struct.pack('>I', self.vendor)  # 8, 9, 10, 11
+        encoded[12:] = self._data.encode()
+        encoded[-1:] += struct.pack(f">{self.padding}B",
+                                    *(0 for i in range(self.padding)))
+        self._encoded = encoded
+        return self._encoded
 
     @staticmethod
     def decodeAVP(bytedata, application):
@@ -62,13 +77,15 @@ class AVP:
     @staticmethod
     def encodeAVP(avp, application):
         encoded = bytearray(avp.length)
-        code = struct.pack_into('>I', encoded, avp.code)
-        flags = struct.pack('>B', avp.flags)
-        # 1:4 bytes = 3bytes
-        length = struct.pack('>I', avp.length)[
-            1:] if avp.length <= 0xffffff else b'Error'
-        vendor = struct.pack('>I', avp.vendor)
-        data = avp.data.encode()
+        encoded[0:] = struct.pack_into('>I', encoded, avp.code)  # 0, 1, 2, 3
+        encoded[4:] = struct.pack('>B', avp.flags)  # 4
+        encoded[5:] = struct.pack('>I', avp.length)[
+            1:] if avp.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
+        encoded[8:] = struct.pack('>I', avp.vendor)  # 8, 9, 10, 11
+        encoded[12:] = avp.data.encode()
+        encoded[-1:] += struct.pack(f">{avp.data.getPaddingC()}B",
+                                    *(0 for i in range(avp.data.getPaddingC())))
+        return encoded
 
     @property
     def code(self):
@@ -106,9 +123,25 @@ class AVP:
     def length(self):
         return self._length
 
+    @property
+    def padding(self):
+        return self._padding
+
+    @property
+    def encoded(self):
+        return self._encoded
+
     def __repr__(self):
         return f"""Code: {self.code}
         Flags: {self.flags}
         Length: {self.length}
         VendorID: {self.vendor}
-        Data: {self.data}"""
+        Data: {self.data},
+        Whole AVP Encoded: {self.encode()}"""
+
+
+if __name__ == "__main__":
+    a = AVP(231, avpflags['Vendor'], vendor=22, data=Integer32(12))
+    b = AVP(232, flags=0x000000, vendor=333, data=Integer32(333))
+    print(a)
+    print(b)
