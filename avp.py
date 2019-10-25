@@ -1,3 +1,5 @@
+import struct
+from binascii import hexlify, unhexlify
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -30,7 +32,7 @@ class AVP:
     def __init__(self, code=None, flags=None, vendor=None, data=None):
         self._code = code
         self._flags = flags
-        self._length = self.headerLength + data.len()
+        self._length = self.headerLength + data.getLength()
         self._vendor = vendor
         self._data = data
 
@@ -44,11 +46,29 @@ class AVP:
     def newAVP(code, flags, vendor, data):
         return AVP(code, flags, vendor, data)
 
+    def encode(self):
+        pass
+
     @staticmethod
-    def decode(data, application):
+    def decodeAVP(bytedata, application):
         a = AVP()
-        a.vendor = 'vendor'
+        a.code = ''
+        a.flags = ''
+        a.length = ''
+        a.vendor = ''
+        a.data = ''
         return AVP
+
+    @staticmethod
+    def encodeAVP(avp, application):
+        encoded = bytearray(avp.length)
+        code = struct.pack_into('>I', encoded, avp.code)
+        flags = struct.pack('>B', avp.flags)
+        # 1:4 bytes = 3bytes
+        length = struct.pack('>I', avp.length)[
+            1:] if avp.length <= 0xffffff else b'Error'
+        vendor = struct.pack('>I', avp.vendor)
+        data = avp.data.encode()
 
     @property
     def code(self):
