@@ -1,6 +1,5 @@
 import struct
 from binascii import hexlify, unhexlify
-from type import Type
 
 """
   0                   1                   2                   3
@@ -25,7 +24,7 @@ AVP_header_length = 12 bytes [4+1+3+4]
 """
 
 
-class Integer32(Type):
+class Integer32:
     def __init__(self, val):
         self._value = val
 
@@ -43,7 +42,7 @@ class Integer32(Type):
 
     def encode(self):
         # Integer32 => 4 bytes
-        return hexlify(struct.pack('>I', self.value.encode('utf-8'))).decode('utf-8')
+        return struct.pack('>I', self.value)
 
     @staticmethod
     def getLength(self=None):
@@ -61,7 +60,6 @@ class Integer32(Type):
 
 
 """ @staticmethod
-
     def getAVPLen(vFlag=False):
         # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
         # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Int32)

@@ -67,11 +67,11 @@ class AVP:
     @staticmethod
     def decodeAVP(bytedata, application):
         a = AVP()
-        a.code = ''
-        a.flags = ''
-        a.length = ''
-        a.vendor = ''
-        a.data = ''
+        a.code = struct.unpack('>I', bytedata[0:4])
+        a.flags = struct.unpack('>B', bytedata[4])
+        a.length = struct.unpack('>I', b'\x00' + bytedata[5:8])
+        a.vendor = struct.unpack('>I', bytedata[8:12])
+        a.data = bytedata[12:]
         return AVP
 
     @staticmethod
