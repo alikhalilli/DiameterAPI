@@ -36,7 +36,6 @@ class AVP:
         self._flags = flags
         self._vendor = vendor
         self._length = self.headerLength + data.getLength()
-        print(self._length)
         self._data = data
         self._padding = data.getPaddingC()
 
