@@ -25,7 +25,7 @@ AVP_header_length = 12 bytes [4+1+3+4]
 """
 
 avpflags = dict(
-    Vendor=1 << 7,
+    Vendor=1 << 7,  # 0b00000001
     Mandatory=1 << 6,
     Protected=1 << 5)
 
