@@ -1,24 +1,16 @@
 import socket
 
 server_address = ('localhost', 6666)
-"""
-socket() -> bind() -> listen() -> accept() -> read() -> write() -> read() -> close()
-"""
-
-with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as server_sock:
-    server_sock.bind(server_address)
-    server_sock.listen()
-    client_sock, addr = server_sock.accept()
-    with client_sock:
-        print(f'Connected by addr:{addr}')
-        print(f'Client socket: {client_sock}')
-        print(f'Server socket: {server_sock}')
-        print(f'Peername: {client_sock.getpeername()}')
+server_socket = socket.socket(socket.AF_INET,
+                              socket.SOCK_STREAM)
+msg_len = len('This is the message. It will be repeated')
+with server_socket:
+    server_socket.bind(server_address)
+    server_socket.listen()
+    client_socket, client_addr = server_socket.accept()
+    with client_socket:
         while True:
-            data = client_sock.recv(16)
-            if data:
-                print(f'Data: {data}')
-                client_sock.sendall(data)
-            else:
-                print(f'No data from {addr}')
+            data = client_socket.recv(16)
+            print(data)
+            if data == b'':
                 break
