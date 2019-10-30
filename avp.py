@@ -140,7 +140,9 @@ class AVP:
 
 
 if __name__ == "__main__":
+
     a = AVP(231, avpflags['Vendor'], vendor=22, data=Integer32(12))
     b = AVP(232, flags=0x000000, vendor=333, data=Integer32(333))
+
     print(a)
     print(b)
