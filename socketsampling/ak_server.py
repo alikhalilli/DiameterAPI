@@ -1,11 +1,16 @@
 import socket
+import selectors
 
+sel = selectors.DefaultSelector()
 server_address = ('localhost', 6666)
 server_socket = socket.socket(socket.AF_INET,
                               socket.SOCK_STREAM)
 msg_len = len('This is the message. It will be repeated')
-# server_socket.setblocking(0)
+server_socket.setblocking(0)
 # server_socket.settimeout(10)
+sel.register(server_socket, selectors.EVENT_READ, data=None)
+
+
 with server_socket:
     server_socket.bind(server_address)
     server_socket.listen()
