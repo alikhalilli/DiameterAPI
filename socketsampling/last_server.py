@@ -33,6 +33,11 @@ class NetworkHandler:
         self._server_socket = socket.socket(self._family, self._type)
         self._server_socket.bind(self._addr)
         self._server_socket.listen(self._queue_size)
+        if activate:
+            try:
+                self._server_socket.accept()
+            except Exception as ex:
+                print(ex)
 
     def close_conn(self):
         self.serversocket.close()
@@ -47,6 +52,3 @@ class NetworkHandler:
 nh = NetworkHandler(host='localhost', port=6666)
 with nh:
     nh.server_forever()
-
-
-class TCPServer:
