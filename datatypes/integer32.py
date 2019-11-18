@@ -58,6 +58,9 @@ class Integer32:
         Padding: {self.getPaddingC()}
         Encoded: {self.encode()}"""
 
+    def getMyPadding(self):
+        pass
+
 
 """ @staticmethod
     def getAVPLen(vFlag=False):
