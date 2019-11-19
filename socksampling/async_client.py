@@ -3,7 +3,7 @@ import socket
 client_socks = [socket.socket(
     socket.AF_INET, socket.SOCK_STREAM) for _ in range(10)]
 
-[client_sock.connect(('127.0.0.1', 5000)) for client_sock in client_socks]
+[client_sock.connect(('127.0.0.1', 1234)) for client_sock in client_socks]
 
 count = 0
 while True:
@@ -14,5 +14,3 @@ while True:
         from_server = client_sock.recv(1024)
         if from_server != b'':
             print(f"from server: {from_server}")
-        else:
-            client_sock.close()
