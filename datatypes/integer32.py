@@ -1,5 +1,6 @@
 import struct
 from binascii import hexlify, unhexlify
+from datatype import Type
 
 """
   0                   1                   2                   3
@@ -24,17 +25,10 @@ AVP_header_length = 12 bytes [4+1+3+4]
 """
 
 
-class Integer32:
-    def __init__(self, val):
+class Integer32(Type):
+    def __init__(self, val, vFlag):
         self._value = val
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, val):
-        self._value = val
+        self._vFlag = vFlag
 
     def decode(self):
         # Integer32 => 4 bytes
@@ -43,6 +37,14 @@ class Integer32:
     def encode(self):
         # Integer32 => 4 bytes
         return struct.pack('>I', self.value)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, val):
+        self._value = val
 
     @staticmethod
     def getLength(self=None):
