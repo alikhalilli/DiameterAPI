@@ -1,21 +1,43 @@
 import select
 import socket
-import selectors
 from collections import namedtuple
-from abc import ABCMeta, abstractmethod, Mapping
+from abc import ABCMeta, abstractmethod
+from collections.abc import Mapping
 
 EVENT_READ = (1 << 0)
 EVENT_WRITE = (1 << 1)
 
-SelectorKey = namedtuple('SelectorKey', ['sock', 'fd', 'events', 'data'])
+SelectorKey = namedtuple('SelectorKey', ['sock', 'fd', 'events', 'clb'])
 
 
-class SocketSelectorMapping(Mapping):
-    def __init__(self, selector):
-        self._selector = selector
+def _get_fd(socket):
+    if isinstance(socket, int):
+        return socket
+    try:
+        fd = int(socket.fileno())
+    except (AttributeError, TypeError, ValueError):
+        raise ValueError(f"Invalid socket obj: {socket}")
+    if fd < 0:
+        raise ValueError("Invalid file descriptor: {fd}")
+    return fd
+
+
+class SocketSelectorMap(Mapping):
+    def __init__(self, socket_selector):
+        self._selector = socket_selector
 
     def __len__(self):
         return len(self._selector._fd_to_selkey_dict)
+
+    def __getitem__(self, sock):
+        try:
+            fd = self._selector._sock_to_fd(sock)
+            return self._selector._fd_to_selkey_dict[fd]
+        except KeyError:
+            raise KeyError(f"{sock} is not refistered.")
+
+    def __iter__(self):
+        return next(self._selector._fd_to_selkey_dict)
 
 
 class BaseSockSelector(metaclass=ABCMeta):
@@ -63,13 +85,24 @@ class BaseSockSelector(metaclass=ABCMeta):
 
 class SocketSelector(BaseSockSelector):
     def __init__(self):
+        super().__init__()
         self._sock_to_key = {}
+        self._map = SocketSelectorMap(self)
+        self._select = select
         self._readers = set()
         self._writers = set()
-        self._select = select
+
+    def get_key(self):
+        pass
+
+    def modify(self, sock):
+        pass
+
+    def _sock_to_fd(self, sock):
+        return _get_fd(sock)
 
     def register(self, sock, events, data=None):
-        key = SelectorKey(sock, sock._get_fd(), events, data)
+        key = SelectorKey(sock, _get_fd(sock), events, data)
 
         if key.fd in self._sock_to_key:
             raise KeyError(
@@ -84,7 +117,7 @@ class SocketSelector(BaseSockSelector):
 
     def unregister(self, sock):
         try:
-            key = self._sock_to_key.pop(sock._get_fd())
+            key = self._sock_to_key.pop(_get_fd(sock))
         except KeyError:
             raise KeyError(f"{sock} is not registered")
         self._writers.discard(key.fd)
@@ -96,7 +129,7 @@ class SocketSelector(BaseSockSelector):
         ready = []
         try:
             r, w, _ = self._select.select(
-                self._readers, self._writers, [], timeout=timeout)
+                self._readers, self._writers, [], timeout)
         except InterruptedError:
             return ready
         r = set(r)
@@ -115,6 +148,10 @@ class SocketSelector(BaseSockSelector):
 
     def close(self, s):
         self._sock_to_key.clear()
+        self._map = None
+
+    def get_map(self):
+        return self._map
 
 
 class Server:
@@ -126,6 +163,15 @@ class Server:
     def prepare(self):
         self.sock.bind((self._host, self._port))
         self.sock.listen(100)
+
+    def accept(self):
+        return self.sock.accept()
+
+    def __enter__(self):
+        return self.sock
+
+    def __exit(self, *args):
+        self.sock.close()
 
     @property
     def sock(self):
@@ -173,13 +219,35 @@ class MySocket:
         return f"{self._socket}"
 
 
-"""mysock = MySocket()
+server = Server(host='127.0.0.1',
+                port=6666,
+                sock=MySocket(blocking=False))
 
-print(mysock.get_file_descriptor())
-"""
+server.prepare()
 
-person = namedtuple('Person', ['name', 'age', 'sex'])
+sockselector = SocketSelector()
 
-ali = person(name='Ali', age=25, sex='male')
 
-print(ali.name)
+def acceptor(sock, mask):
+    cli_sock, addr = sock.accept()
+    cli_sock.setblocking(False)
+    sockselector.register(cli_sock, EVENT_READ, handler)
+
+
+def handler(cli_sock, mask):
+    cli_address = cli_sock.getpeername()
+    total_bytes = 0
+    data = cli_sock.recv(1024)
+    total_bytes += len(data)
+    if data != b'':
+        print(f"{data} from {cli_address}, total bytes: {total_bytes}")
+    else:
+        sockselector.unregister(cli_sock)
+        cli_sock.close()
+
+
+sockselector.register(server.sock, EVENT_READ, acceptor)
+while True:
+    for key, mask in sockselector.select(timeout=1):
+        clb_func = key.clb
+        clb_func(key.sock, mask)

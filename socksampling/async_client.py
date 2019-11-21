@@ -4,9 +4,9 @@ import asyncio
 client_socks = [socket.socket(
     socket.AF_INET, socket.SOCK_STREAM) for _ in range(1)]
 
-[client_sock.connect(('127.0.0.1', 8888)) for client_sock in client_socks]
+[client_sock.connect(('127.0.0.1', 6666)) for client_sock in client_socks]
 
-data = [i for i in range(10000)]
+data = ['salam' for i in range(10000)]
 
 count = 0
 while True:

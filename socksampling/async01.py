@@ -11,7 +11,6 @@ class EchoServerProtocol(asyncio.Protocol):
         message = data.decode()
         print('Data received: {!r}'.format(message))
         print(self.transport)
-
         print('Send: {!r}'.format(message))
         self.transport.write(data)
 
