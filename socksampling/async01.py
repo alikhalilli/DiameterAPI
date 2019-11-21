@@ -1,25 +1,32 @@
 import asyncio
 
 
-async def client_connected(reader, writer):
-    data = await reader.read(100)
-    message = data.decode()
-    addr = writer.get_extra_info('peername')
+class EchoServerProtocol(asyncio.Protocol):
+    def connection_made(self, transport):
+        peername = transport.get_extra_info('peername')
+        print('Connection from {}'.format(peername))
+        self.transport = transport
 
-    print(f"Received {message!r} from {addr!r}")
+    def data_received(self, data):
+        message = data.decode()
+        print('Data received: {!r}'.format(message))
+        print(self.transport)
 
-    print(f"Send: {message!r}")
-    writer.write(data)
-    await writer.drain()
+        print('Send: {!r}'.format(message))
+        self.transport.write(data)
 
 
 async def main():
-    server = await asyncio.start_server(client_connected, '127.0.0.1', 8888)
+    # Get a reference to the event loop as we plan to use
+    # low-level APIs.
+    loop = asyncio.get_running_loop()
 
-    addr = server.sockets[0].getsockname()
-    print(f'Serving on {addr}')
+    server = await loop.create_server(
+        lambda: EchoServerProtocol(),
+        '127.0.0.1', 8888)
 
     async with server:
         await server.serve_forever()
+
 
 asyncio.run(main())
