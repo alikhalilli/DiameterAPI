@@ -17,8 +17,8 @@ class Header:
         self._cmdflags = cmdflags
         self._cmdcode = cmdcode
         self._appId = appId
-        self.hopByhopId = hopByHopId
-        self.endToEndId = endToEndId
+        self._hopByhopId = hopByHopId
+        self._endToEndId = endToEndId
 
     @property
     def version(self):
