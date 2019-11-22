@@ -83,8 +83,8 @@ class AVP:
         encoded = bytearray()
         encoded[0:] = pack('>I', self.code)  # 0, 1, 2, 3
         encoded[4:] = pack('>B', self.flags)  # 4
-        encoded[5:] = pack('>I', self.length)[
-            1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
+        encoded[5:] = int(self.length).to_bytes(3, byteorder='big')
+        # pack('>I', self.length)[1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
         encoded[8:] = pack('>I', self.vendor)  # 8, 9, 10, 11
         encoded[12:] = self._data.encode()
         encoded[-1:] += pack(f">{self.padding}B",
@@ -97,7 +97,8 @@ class AVP:
         a = AVP()
         a.code = unpack('>I', bytedata[0:4])
         a.flags = unpack('>B', bytedata[4])
-        a.length = unpack('>I', b'\x00' + bytedata[5:8])
+        # unpack('>I', b'\x00' + bytedata[5:8])
+        a.length = int.from_bytes(bytedata[5:8], byteorder='big')
         a.vendor = unpack('>I', bytedata[8:12])
         a.data = (AVP.getType(a.code, a.vendor)).decode(bytedata[12:])
         return AVP
