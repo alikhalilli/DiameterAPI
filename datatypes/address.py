@@ -1,10 +1,11 @@
 from .octetstring import OctetString
 from .datatype import Type
+from struct import pack, unpack
 
 addressFamily = {
-    'Reserved': {'val': [0x00, 0x00], 'len': 0},
-    'IPv4': {'val': [0x00, 0x01], 'len': 4},
-    'IPv6': {'val': [0x00, 0x02], 'len': 16}
+    'Reserved': {'val': bytearray([0x00, 0x00]), 'len': 0},
+    'IPv4': {'val': bytearray([0x00, 0x01]), 'len': 4},
+    'IPv6': {'val': bytearray([0x00, 0x02]), 'len': 16}
 }
 
 """
@@ -27,9 +28,18 @@ class Adress(OctetString):
 
     def __init__(self, value):
         super().__init__(value)
+        self._addrType = getNatureOfAdress(value)
 
     def encode(self):
         encoded = bytearray()
+        encoded[0:] = addressFamily[self._addrType]['val']
+        encoded[2:6] = None
 
+    def decode(self):
+        pass
 
-print(bytearray([0x00, 0x01]))
+    def __len__(self):
+        return addressFamily[self._addrType]['len'] + 2
+
+    def len(self):
+        return self.__len__()

@@ -39,7 +39,7 @@ class OctetString(Type):
         return unpack(f'>{len(self._value)//2}s', unhexlify(self._value))
 
     def len(self):
-        return len(self)
+        return self.__len__()
 
     def __len__(self):
         return len(self._value)
