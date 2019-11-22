@@ -2,6 +2,7 @@ from .octetstring import OctetString
 from .datatype import Type
 from struct import pack, unpack
 import ipaddress
+from functools import reduce
 
 addressFamily = {
     'Reserved': {'val': bytearray([0x00, 0x00]), 'len': 0},
@@ -36,6 +37,10 @@ def ipv4toInt(octets):
     return result
 
 
+def intToIpv4(octets):
+    return reduce(lambda x, y: x << 8 | y, octets)
+
+
 def ipv4Address(addr):
     if isinstance(addr, str):
         octets = addr.split('.')
@@ -48,7 +53,7 @@ def parse_octet(octetstr):
     return(int(octetstr, 10))
 
 
-class Adress(OctetString):
+class Address(OctetString):
 
     def __init__(self, value):
         super().__init__(value)
@@ -64,6 +69,13 @@ class Adress(OctetString):
 
     def decode(self):
         pass
+
+    def decodeFromBytes(self, buff):
+        self._addrType = buff[:2]
+        if self._addrType == addressFamily['IPv4']['val']:
+            return intToIpv4(int.from_bytes(buff[2:]))
+        elif self._addrType == addressFamily['IPv6']['val']:
+            pass
 
     def __len__(self):
         return addressFamily[self._addrType]['len'] + 2

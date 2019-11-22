@@ -48,8 +48,8 @@ class OctetString(Type):
         return get_paddingc(self.len()) - self.len()
 
     @staticmethod
-    def decodeFromBytes(buf):
-        return unpack(f'>{len(buf)}s', buf)
+    def decodeFromBytes(buff):
+        return unpack(f'>{len(buff)}s', buff)
 
 
 """    @staticmethod
