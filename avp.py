@@ -1,6 +1,13 @@
-import struct
+from struct import pack, pack_into, unpack
 from binascii import hexlify, unhexlify
-from integer32 import Integer32
+from datatypes.integer32 import Integer32
+from datatypes.integer64 import Integer64
+from datatypes.float32 import Float32
+from datatypes.float64 import Float64
+from datatypes.octetstring import OctetString
+from datatypes.diamidentity import DiameterIdentity
+from collections import namedtuple
+from datatypes.datatype import Type
 
 """
   0                   1                   2                   3
@@ -24,6 +31,27 @@ from integer32 import Integer32
 AVP_header_length = 12 bytes [4+1+3+4]
 """
 
+
+types = {
+    "Address": None,
+    "DiameterIdentity": DiameterIdentity,
+    "DiameterURI": None,
+    "Enumerated": None,
+    "Float32": Float32,
+    "Float64": Float64,
+    "Grouped": None,
+    "IPFilterRule": None,
+    "IPv4": None,
+    "Integer32": Integer32,
+    "Integer64": Integer64,
+    "OctetString": OctetString,
+    "QoSFilterRule": None,
+    "Time": None,
+    "UTF8String": None,
+    "Unsigned32": None,
+    "Unsigned64": None,
+}
+
 avpflags = dict(
     Vendor=1 << 7,  # 0b00000001
     Mandatory=1 << 6,
@@ -35,14 +63,15 @@ class AVP:
         self._code = code
         self._flags = flags
         self._vendor = vendor
-        self._length = self.headerLength + data.getLength()
+        self._length = self.headerLength + data.len()
         self._data = data
-        self._padding = data.getPaddingC()
+        self._encoded = None
+        self._padding = data.getpadding()
 
     @property
     def headerLength(self):
-        if self.vendor:
-            if (self.flags & avpflags['Vendor']):
+        if self._vendor:
+            if (self._flags & avpflags['Vendor']):
                 return 12
         return 8
 
@@ -52,38 +81,43 @@ class AVP:
 
     def encode(self):
         encoded = bytearray()
-        encoded[0:] = struct.pack('>I', self.code)  # 0, 1, 2, 3
-        encoded[4:] = struct.pack('>B', self.flags)  # 4
-        encoded[5:] = struct.pack('>I', self.length)[
+        encoded[0:] = pack('>I', self.code)  # 0, 1, 2, 3
+        encoded[4:] = pack('>B', self.flags)  # 4
+        encoded[5:] = pack('>I', self.length)[
             1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
-        encoded[8:] = struct.pack('>I', self.vendor)  # 8, 9, 10, 11
+        encoded[8:] = pack('>I', self.vendor)  # 8, 9, 10, 11
         encoded[12:] = self._data.encode()
-        encoded[-1:] += struct.pack(f">{self.padding}B",
-                                    *(0 for i in range(self.padding)))
+        encoded[-1:] += pack(f">{self.padding}B",
+                             *(0 for i in range(self.padding)))
         self._encoded = encoded
         return self._encoded
 
     @staticmethod
-    def decodeAVP(bytedata, application):
+    def decodeFromBuffer(bytedata):
         a = AVP()
-        a.code = struct.unpack('>I', bytedata[0:4])
-        a.flags = struct.unpack('>B', bytedata[4])
-        a.length = struct.unpack('>I', b'\x00' + bytedata[5:8])
-        a.vendor = struct.unpack('>I', bytedata[8:12])
-        a.data = bytedata[12:]
+        a.code = unpack('>I', bytedata[0:4])
+        a.flags = unpack('>B', bytedata[4])
+        a.length = unpack('>I', b'\x00' + bytedata[5:8])
+        a.vendor = unpack('>I', bytedata[8:12])
+        a.data = (AVP.getType(a.code, a.vendor)).decode(bytedata[12:])
         return AVP
 
     @staticmethod
-    def encodeAVP(avp, application):
+    def getType(avpcode, avpvendor):
+        return types["Integer"]
+
+    @staticmethod
+    def encodeFromObj(avp, application):
         encoded = bytearray(avp.length)
-        encoded[0:] = struct.pack_into('>I', encoded, avp.code)  # 0, 1, 2, 3
-        encoded[4:] = struct.pack('>B', avp.flags)  # 4
-        encoded[5:] = struct.pack('>I', avp.length)[
-            1:] if avp.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
-        encoded[8:] = struct.pack('>I', avp.vendor)  # 8, 9, 10, 11
+        encoded[0:] = pack('>I', avp.code)  # 0, 1, 2, 3
+        encoded[4:] = pack('>B', avp.flags)  # 4
+        # 1:4 bytes = 3bytes ; 5, 6, 7
+        encoded[5:] = pack('>I', avp.length)[
+            1:] if avp.length <= 0xffffff else b'Error'
+        encoded[8:] = pack('>I', avp.vendor)  # 8, 9, 10, 11
         encoded[12:] = avp.data.encode()
-        encoded[-1:] += struct.pack(f">{avp.data.getPaddingC()}B",
-                                    *(0 for i in range(avp.data.getPaddingC())))
+        encoded[-1:] += pack(f">{avp.data.getPaddingC()}B",
+                             *(0 for i in range(avp.data.getPaddingC())))
         return encoded
 
     @property
@@ -131,17 +165,39 @@ class AVP:
         return self._encoded
 
     def __repr__(self):
-        return f"""Code: {self.code}
+        return f"""
+        --------------------------------------
+        AVP:
+        Code: {self.code}
         Flags: {self.flags}
         Length: {self.length}
         VendorID: {self.vendor}
         Data: {self.data},
-        Whole AVP Encoded: {self.encode()}"""
+        Whole AVP Encoded: {self.encode()}
+        --------------------------------------"""
 
 
 if __name__ == "__main__":
 
-    a = AVP(231, avpflags['Vendor'], vendor=22, data=Integer32(12))
-    b = AVP(232, flags=0x000000, vendor=333, data=Integer32(333))
-    print(a)
-    print(b)
+    a = AVP(231,
+            flags=avpflags['Vendor'] | avpflags['Mandatory'],
+            vendor=22,
+            data=Integer32(12))
+    b = AVP(232,
+            flags=avpflags['Mandatory'],
+            vendor=333,
+            data=Integer32(333))
+    c = Integer32.decodeFromBytes(b'\x00\x00\x00\x0c')
+    d = AVP(233,
+            flags=avpflags['Vendor'],
+            vendor=77,
+            data=OctetString("Salam"))
+    di = AVP(234,
+             flags=avpflags['Vendor'],
+             vendor=78,
+             data=DiameterIdentity("aaa://host.example.com:6666;transport=tcp;protocol=diameter"))
+    print(f"data: {a}")
+    print(f"decoded: {c}")
+    print(d)
+    print(di)
+    # print(b)
