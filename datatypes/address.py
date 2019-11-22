@@ -1,6 +1,7 @@
 from .octetstring import OctetString
 from .datatype import Type
 from struct import pack, unpack
+import ipaddress
 
 addressFamily = {
     'Reserved': {'val': bytearray([0x00, 0x00]), 'len': 0},
@@ -24,6 +25,29 @@ def getNatureOfAdress(val):
     return 'ipv4'
 
 
+class AdressValueError(ValueError):
+    pass
+
+
+def ipv4toInt(octets):
+    result = 0
+    for i, octet in zip(range(len(octets)-1, -1, -1), octets):
+        result += pow(256, i) * int(octet)
+    return result
+
+
+def ipv4Address(addr):
+    if isinstance(addr, str):
+        octets = addr.split('.')
+        if len(octets) != 4:
+            raise AdressValueError("Invalid Ipv4")
+        print(int.from_bytes(map(parse_octet, octets), 'big'))
+
+
+def parse_octet(octetstr):
+    return(int(octetstr, 10))
+
+
 class Adress(OctetString):
 
     def __init__(self, value):
@@ -33,7 +57,10 @@ class Adress(OctetString):
     def encode(self):
         encoded = bytearray()
         encoded[0:] = addressFamily[self._addrType]['val']
-        encoded[2:6] = None
+        if self._addrType == 'IPv4':
+            encoded[2:6] = ipaddress.IPv4Address(self._value).packed()
+        elif self._addrType == 'IPv6':
+            encoded[2:18] = ipaddress.IPv6Address(self._value).packed()
 
     def decode(self):
         pass
