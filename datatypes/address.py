@@ -3,6 +3,7 @@ from .datatype import Type
 from struct import pack, unpack
 import ipaddress
 from functools import reduce
+import socket
 
 addressFamily = {
     'Reserved': {'val': bytearray([0x00, 0x00]), 'len': 0},
@@ -37,6 +38,13 @@ def ipv4toInt(octets):
     return result
 
 
+def intToIpV4_2():
+    octets = [192, 168, 0, 1]
+    result = 0
+    for octet in octets:
+        result = 256
+
+
 def intToIpv4(octets):
     return reduce(lambda x, y: x << 8 | y, octets)
 
@@ -63,9 +71,11 @@ class Address(OctetString):
         encoded = bytearray()
         encoded[0:] = addressFamily[self._addrType]['val']
         if self._addrType == 'IPv4':
-            encoded[2:6] = ipaddress.IPv4Address(self._value).packed()
+            encoded[2:6] = socket.inet_pton(socket.AF_INET, self._value)
         elif self._addrType == 'IPv6':
-            encoded[2:18] = ipaddress.IPv6Address(self._value).packed()
+            encoded[2:18] = socket.inet_pton(socket.AF_INET6, self._value)
+
+        return encoded
 
     def decode(self):
         pass
@@ -73,9 +83,9 @@ class Address(OctetString):
     def decodeFromBytes(self, buff):
         self._addrType = buff[:2]
         if self._addrType == addressFamily['IPv4']['val']:
-            return intToIpv4(int.from_bytes(buff[2:]))
+            return socket.inet_ntop(socket.AF_INET, buff[2:])
         elif self._addrType == addressFamily['IPv6']['val']:
-            pass
+            return socket.inet_ntop(socket.AF_INET6, buff[2:])
 
     def __len__(self):
         return addressFamily[self._addrType]['len'] + 2
