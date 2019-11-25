@@ -17,12 +17,9 @@ for node in xml_dictionary.getElementsByTagName('AVP_Def'):
     if node.getAttribute('type') == 'Enumerated':
         enumList = []
         for enum in node.getElementsByTagName('EnumValue'):
-            enumList.append({enum.getAttribute('comment'): enum.getAttribute('value')})
-
-    for enumnode in node.getElementsByTagName("EnumValue"):
-        avpWithName[node.getAttribute('name')].update(
-
-        )
+            enumList.append({enum.getAttribute('comment')
+                            : enum.getAttribute('value')})
+        avpWithName[node.getAttribute('name')].update({'enumInfo': enumList})
 
     avpWithCode[node.getAttribute('code')] = dict(
         name=node.getAttribute('name'),
@@ -31,4 +28,4 @@ for node in xml_dictionary.getElementsByTagName('AVP_Def'):
     )
 
 print(avpWithName)
-print(avpWithCode)
+# print(avpWithCode)

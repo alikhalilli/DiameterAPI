@@ -1,6 +1,6 @@
 from struct import pack, unpack
 from binascii import hexlify, unhexlify
-
+import random
 
 """
  0                   1                   2                   3
@@ -39,13 +39,13 @@ class Header:
                  hopByHopId,
                  endToEndId):
         self._version = version
-        self._msglength = msglength
         self._headerlength = 20
+        self._msglength = self._headerlength
         self._cmdflags = cmdflags
         self._cmdcode = cmdcode
         self._appId = appId
-        self._hopByhopId = hopByHopId
-        self._endToEndId = endToEndId
+        self._hopByhopId = random.getrandbits(32)
+        self._endToEndId = random.getrandbits(32)
 
     @property
     def version(self):
@@ -57,28 +57,28 @@ class Header:
 
     @staticmethod
     def getLength():
-        return 20
+        return self._msglength
 
     def encode(self):
         encoded = bytearray()
         encoded[0:] = pack('>B', self._version)
         encoded[1:] = int(self._msglength).to_bytes(3, byteorder='big')
-        encoded[5:] = pack('>B',  self._cmdflags)
-        encoded[6:] = int(self._cmdcode).to_bytes(3, byteorder='big')
-        encoded[9:] = pack('>I', self._appId)
-        encoded[13:] = pack('>I', self._hopByhopId)
-        encoded[17:] = pack('>I', self._endToEndId)
+        encoded[4:] = pack('>B',  self._cmdflags)
+        encoded[5:] = int(self._cmdcode).to_bytes(3, byteorder='big')
+        encoded[8:] = pack('>I', self._appId)
+        encoded[12:] = pack('>I', self._hopByhopId)
+        encoded[16:] = pack('>I', self._endToEndId)
         return encoded
 
     def decode(self, buff):
-        if len(buff)/2 < self._headerlength:
+        if len(buff) < self._headerlength:
             raise ValueError(f"Corrupted data {buff}")
         return Header(
-            version=unpack('>B', buff[0]),
-            msglength=unpack('>I', b'\x00' + buff[1:4]),
-            cmdflags=unpack('>B', buff[4]),
-            cmdcode=unpack('>I', b'\x00' + buff[5:8]),
-            appId=unpack('>I', buff[8:12]),
-            hopByHopId=unpack('>I', buff[12:16]),
-            endToEndId=unpack('>I', buff[16:20])
+            version=unpack('>B', buff[0])[0],
+            msglength=int.from_bytes(buff[1:4], byteorder='big'),
+            cmdflags=unpack('>B', buff[4])[0],
+            cmdcode=int.from_bytes(buff[5:8], byteorder='big'),
+            appId=unpack('>I', buff[8:12])[0],
+            hopByHopId=unpack('>I', buff[12:16])[0],
+            endToEndId=unpack('>I', buff[16:20])[0]
         )

@@ -1,6 +1,6 @@
 from struct import pack, unpack
 from binascii import hexlify, unhexlify
-from .datatype import Type
+from datatype import Type
 
 """
   0                   1                   2                   3
@@ -31,7 +31,7 @@ class Integer32(Type):
 
     def encode(self):
         # Integer32 => 4 bytes
-        return pack('>I', self.value)
+        return pack('>I', self._value)
 
     def decode(self):
         # Integer32 => 4 bytes
@@ -45,9 +45,13 @@ class Integer32(Type):
 
     @staticmethod
     def decodeFromBytes(buf):
-        return unpack('>I', buf)
+        # return unpack('>I', buf)
+        return int.from_bytes(buf, byteorder='big')
 
 
+print(Integer32(32444).encode())
+print(Integer32.decodeFromBytes(b'\x00\x00~\xbc'))
+print(len(b'\x00\x00~\xbc'))
 """ @staticmethod
     def getAVPLen(vFlag=False):
         # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
