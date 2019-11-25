@@ -1,0 +1,2036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+      File : Ericsson_SCAPv2.xml
+      No.  : 4/190 01-FAM 901 432/2
+      Date : 2018-03-23
+      Rev  : F
+ 
+ Copyright (c) 2012 Ericsson AB - All rights reserved.
+ The Copyright to the computer program(s) herein is the property of
+ Ericsson AB.
+ The program(s) may be used and/or copied with the written permission
+ from Ericsson AB or in accordance with the terms and conditions 
+ stipulated in the agreement/contract under which the program(s) have 
+ been supplied.
+
+ The contents of this document are subject to revision without notice due
+ to continued progress in methodology, design and manufacturing.
+
+ Ericsson AB shall have no liability for any errors or damage of any kind 
+ resulting from the use of modified versions of this document.
+
+ DESCRIPTION:
+  This is the Ericsson Multi Mediation specification for
+  SCAPv2 protocol.
+  
+ REVISION HISTORY:
+ Rev    Date          Author        Action
+ A    2013-04-03      ekpjaya     Initial Revision  
+ B    2013-07-25      ekpjaya     Fix to support Multiple Subscription IDs
+ C    2013-07-25      enagaar     PMR 1007-2 Scapv2 session
+ D    2015-12-07      xmdmdmd     Included Service-Parameter-Info grouped AVP under MSCC in CCA(Initial, Update, Terminate)
+ E    2015-08-04      xjaysen     Introduced MSCCcounter for MSCC AVP in CCR(Initial, Update, Terminate)
+ F    2018-03-23      emprcha	  TR:HW71111 Mandatory flag should be false for 3GPP-MS-Timezone for SCAPv2
+
+ DEVIATIONS:
+   None    
+    
+ SOURCE DOCUMENT:
+   Title : QSM SCAPv2 Support in OCC
+   Rev : B
+   No. : 351/0363-FCP 116 238 
+
+
+-->
+<!-- The  protocol support.-->
+<Protocol id="Diameter DCC SCAPv2, country" spec="15/1551-FAY 301 061"
+          name="Diameter" version="1.0" 
+          isHeaderInformationRequired="true"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:noNamespaceSchemaLocation="file:/$CLASSES/cmg/stdapp/diameter/validation/Diameter_addon_schema.xsd">
+    <!-- SupportedVendorId tags should be inserted here -->
+    <SupportedVendorId vendorId="193" comment="Ericsson"/>
+    <SupportedVendorId vendorId="10415" comment="3GPP"/>
+    <SupportedVendorId vendorId="12645" comment="VF"/>
+    
+    <!-- The RecordDefinition is used to tell the diameter front-end which avps are used for 
+               record type and record numbers and how to interprete them, i.e. what record type 
+               value corresponds to START, INTERIM, STOP and EVENT. -->
+    <RecordDefinition recordTypeAvpCode="416" recordNumberAvpCode="415" startRecordTypeValue="1"
+                          interimRecordTypeValue="2" stopRecordTypeValue="3" eventRecordTypeValue="4" 
+                          comment="Record definition for vendor specific records"/>
+
+    <!-- RAR/RAA ASR/ASA support -->
+        <AVP_Def name="Command-Code" code="999" type="Unsigned32" mandatoryFlag="false"/> 
+    <!-- END RAR/RAA ASR/ASA support -->    
+
+   <!-- Diameter Base Protocol RFC3588 -->
+    <AVP_Def name="Auth-Application-Id" code="258" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Re-Auth-Request-Type" code="285" type="Enumerated" mandatoryFlag="true">
+                <EnumValue value="0" comment="AUTHORIZE_ONLY"/>
+           <EnumValue value="1" comment="AUTHORIZE_AUTHENTICATE"/>
+    </AVP_Def>
+        <AVP_Def name="Redirect-Max-Cache-Time" code="262" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Destination-Host" code="293" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Destination-Realm" code="283" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Event-Timestamp" code="55" type="Time" mandatoryFlag="true"/>
+    <AVP_Def name="Failed-AVP" code="279" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Origin-Host" code="264" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Error-Message" code="281" type="UTF8String" mandatoryFlag="false"/>
+    <AVP_Def name="Error-Reporting-Host" code="294" type="DiameterIdentity" mandatoryFlag="false"/>
+    <AVP_Def name="Origin-Realm" code="296" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Origin-State-Id" code="278" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Proxy-Info" code="284" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Proxy-Host" code="280" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Proxy-State" code="33" type="OctetString" mandatoryFlag="true"/>
+    <AVP_Def name="Redirect-Host" code="292" type="DiameterURI" mandatoryFlag="true"/>
+    <AVP_Def name="Redirect-Host-Usage" code="261" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="DONT_CACHE"/>
+           <EnumValue value="1" comment="ALL_SESSION"/>
+           <EnumValue value="2" comment="ALL_REALM"/>
+           <EnumValue value="3" comment="REALM_AND_APPLICATION"/>
+           <EnumValue value="4" comment="ALL_APPLICATION"/>
+           <EnumValue value="5" comment="ALL_HOST"/>
+           <EnumValue value="6" comment="ALL_USER"/>
+    </AVP_Def>
+    
+         <AVP_Def name="Result-Code" code="268" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Route-Record" code="282" type="DiameterIdentity" mandatoryFlag="true"/>
+    <AVP_Def name="Session-Id" code="263" type="UTF8String" mandatoryFlag="true"/>
+    <AVP_Def name="Termination-Cause" code="295" type="Enumerated" mandatoryFlag="true">
+           <EnumValue value="1" comment="DIAMETER_LOGOUT"/>
+           <EnumValue value="2" comment="DIAMETER_SERVICE_NOT_PROVIDED"/>
+           <EnumValue value="3" comment="DIAMETER_BAD_ANSWER"/>
+           <EnumValue value="4" comment="DIAMETER_ADMINISTRATIVE"/>
+           <EnumValue value="5" comment="DIAMETER_LINK_BROKEN"/>
+           <EnumValue value="6" comment="DIAMETER_AUTH_EXPIRED"/>
+           <EnumValue value="7" comment="DIAMETER_USER_MOVED"/>
+           <EnumValue value="8" comment="DIAMETER_SESSION_TIMEOUT"/>
+    </AVP_Def>
+    <AVP_Def name="User-Name" code="1" type="UTF8String" mandatoryFlag="true"/>
+<!-- End of Diameter Base Protocol RFC3588 -->
+        
+<!-- Diameter CCA -->
+    <AVP_Def name="CC-Request-Number" code="415" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="CC-Request-Type" code="416" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="1" comment="INITIAL_REQUEST"/>
+        <EnumValue value="2" comment="UPDATE_REQUEST"/>
+        <EnumValue value="3" comment="TERMINATION_REQUEST"/>
+        <EnumValue value="4" comment="EVENT_REQUEST"/>
+    </AVP_Def>
+    <AVP_Def name="CC-Session-Failover" code="418" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="FAILOVER_NOT_SUPPORTED"/>
+             <EnumValue value="1" comment="FAILOVER_SUPPORTED"/>
+    </AVP_Def>
+    <AVP_Def name="Credit-Control-Failure-Handling" code="427" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="TERMINATE"/>
+                  <EnumValue value="1" comment="CONTINUE"/>
+                  <EnumValue value="2" comment="RETRY_AND_TERMINATE"/>
+    </AVP_Def>
+    <AVP_Def name="Multiple-Services-Credit-Control" code="456" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Multiple-Services-Indicator" code="455" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="MULTIPLE_SERVICES_NOT_SUPPORTED"/>
+        <EnumValue value="1" comment="MULTIPLE_SERVICES_SUPPORTED"/>
+    </AVP_Def>
+    <AVP_Def name="Requested-Service-Unit" code="437" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Service-Context-Id" code="461" type="UTF8String" mandatoryFlag="true"/>
+    <AVP_Def name="Subscription-Id" code="443" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="User-Equipment-Info" code="458" type="Grouped" mandatoryFlag="true"/>
+    
+    
+    <AVP_Def name="Service-Identifier" code="439" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="CC-Input-Octets" code="412" type="Unsigned64" mandatoryFlag="true"/>
+    <AVP_Def name="CC-Output-Octets" code="414" type="Unsigned64" mandatoryFlag="true"/>    
+    <AVP_Def name="CC-Service-Specific-Units" code="417" type="Unsigned64" mandatoryFlag="true"/>
+    <AVP_Def name="CC-Time" code="420" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="CC-Total-Octets" code="421" type="Unsigned64" mandatoryFlag="true"/>
+    <AVP_Def name="Final-Unit-Indication" code="430" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Granted-Service-Unit" code="431" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Rating-Group" code="432" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Redirect-Address-Type" code="433" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="IPv4_Address"/>
+        <EnumValue value="1" comment="IPv6_Address"/>
+        <EnumValue value="2" comment="URL"/>
+        <EnumValue value="3" comment="SIP_URI"/>
+    </AVP_Def>
+    <AVP_Def name="Redirect-Server" code="434" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Redirect-Server-Address" code="435" type="UTF8String" mandatoryFlag="true"/>
+    
+    
+    <AVP_Def name="Subscription-Id-Data" code="444" type="UTF8String" mandatoryFlag="true"/>
+    <AVP_Def name="Used-Service-Unit" code="446" type="Grouped" mandatoryFlag="true"/>
+    <AVP_Def name="Validity-Time" code="448" type="Unsigned32" mandatoryFlag="true"/>
+    <AVP_Def name="Final-Unit-Action" code="449" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="TERMINATE"/>
+             <EnumValue value="1" comment="REDIRECT"/>
+    </AVP_Def>
+    <AVP_Def name="Subscription-Id-Type" code="450" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="END_USER_E164"/>
+        <EnumValue value="1" comment="END_USER_IMSI"/>
+        <EnumValue value="2" comment="END_USER_SIP_URI"/>
+        <EnumValue value="3" comment="END_USER_NAI"/>
+        <EnumValue value="4" comment="END_USER_PRIVATE"/>
+    </AVP_Def>
+    <AVP_Def name="Tariff-Time-Change" code="451" type="Time" mandatoryFlag="true"/>
+    <AVP_Def name="Tariff-Change-Usage" code="452" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="UNIT_BEFORE_TARIFF_CHANGE"/>
+        <EnumValue value="1" comment="UNIT_AFTER_TARIFF_CHANGE"/>
+        <EnumValue value="2" comment="UNIT_INDETERMINATE"/>
+    </AVP_Def>
+        
+    <AVP_Def name="User-Equipment-Info-Type" code="459" type="Enumerated" mandatoryFlag="true">
+        <EnumValue value="0" comment="IMEISV"/>
+        <EnumValue value="1" comment="MAC"/>
+        <EnumValue value="2" comment="EUI64"/>
+        <EnumValue value="3" comment="MODIFIED_EUI64"/>
+    </AVP_Def>
+    <AVP_Def name="User-Equipment-Info-Value" code="460" type="OctetString" mandatoryFlag="true"/>
+    
+   
+<!-- END Diameter CCA -->
+
+<!-- 3GPP AVP's  -->
+    <AVP_Def name="3GPP-MS-TimeZone" code="23" type="OctetString" mandatoryFlag="false" vendorId="10415"/>
+    <AVP_Def name="Time-Quota-Threshold" code="868"  type="Unsigned32" mandatoryFlag="true" vendorId="10415" />
+    <AVP_Def name="Volume-Quota-Threshold" code="869"  type="Unsigned32" mandatoryFlag="true" vendorId="10415" />
+    <AVP_Def name="Unit-Quota-Threshold" code="1226"  type="Unsigned32" mandatoryFlag="true" vendorId="10415" />
+<!-- END 3GPP Gi/Gy   -->
+<!-- Defined for SCAPv2 -->
+
+        <AVP_Def name="Account-Location" code="1073"  type="Unsigned32" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="Subscription-Id-Location" code="1074"  type="UTF8String" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="Other-Party-Id" code="1075"  type="Grouped" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="Other-Party-Id-Nature" code="1076"  type="Enumerated" mandatoryFlag="true" vendorId="193">
+                <EnumValue value="0" comment="UNKNOWN"/>
+                <EnumValue value="1" comment="INTERNATIONAL"/>
+                <EnumValue value="2" comment="NATIONAL"/>
+        </AVP_Def>
+        <AVP_Def name="Other-Party-Id-Data" code="1077"  type="UTF8String" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="Other-Party-Id-Type" code="1078"  type="Enumerated" mandatoryFlag="true" vendorId="193" >
+                <EnumValue value="0" comment="END_USER_E164"/>
+                <EnumValue value="1" comment="END_USER_IMSI"/>
+                <EnumValue value="2" comment="END_USER_SIP_URI"/>
+                <EnumValue value="3" comment="END_USER_NAI"/>
+        </AVP_Def>
+        <AVP_Def name="Service-Provider-Id" code="1081"  type="UTF8String" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="Traffic-Case" code="1082"  type="Unsigned32" mandatoryFlag="true" vendorId="193" />
+
+        <AVP_Def name="Service-Parameter-Info" code="440" type="Grouped" mandatoryFlag="false" />
+        <AVP_Def name="Service-Parameter-Type" code="441" type="Unsigned32" mandatoryFlag="false" />
+        <AVP_Def name="Service-Parameter-Value" code="442" type="OctetString" mandatoryFlag="false" />
+        <AVP_Def name="Cost-Information" code="423" type="Grouped" mandatoryFlag="true" />
+        <AVP_Def name="Unit-Value" code="445" type="Grouped" mandatoryFlag="true" />
+        <AVP_Def name="Value-Digits" code="447" type="Integer64" mandatoryFlag="true" />
+        <AVP_Def name="Exponent" code="429" type="Integer32" mandatoryFlag="true" />
+        <AVP_Def name="Currency-Code" code="425" type="Unsigned32" mandatoryFlag="true" />
+        <AVP_Def name="Cost-Unit" code="424" type="UTF8String" mandatoryFlag="true" />
+        <AVP_Def name="Result-Code-Extension" code="1067" type="Unsigned32" mandatoryFlag="true" vendorId="193" />
+        <AVP_Def name="CC-Money" code="413" type="Grouped" mandatoryFlag="true" />
+        <AVP_Def name="Requested-Action" code="436" type="Enumerated" mandatoryFlag="true">
+                <EnumValue value="0" comment="DIRECT_DEBITING"/>
+                <EnumValue value="1" comment="REFUND_ACCOUNT"/>
+                <EnumValue value="2" comment="CHECK_BALANCE"/>
+                <EnumValue value="3" comment="PRICE_ENQUIRY"/>
+        </AVP_Def>
+
+<!-- __________________________ End of DCC protocol declaration__________________________ -->
+        <AVP_Def name="CC-Correlation-Id" code="411" type="OctetString" mandatoryFlag="false"/>
+        <AVP_Def name="Acct-Multi-Session-Id" code="50"  type="UTF8String" mandatoryFlag="true"/>
+
+<!-- SCAPv2 Direct Debit Request -->
+ <!-- Note : Request name should not be changed -->
+ <Request name="SCAPv2-Direct-Debit" ignoreMandatoryFlag="false">
+     <Condition key="Requested-Action" value="0" comment="Direct Debit Requested Action"/>
+
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Destination-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="Service-Context-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" occurrence="1"/>
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+        <AVP name="Subscription-Id-Type"/>
+        <AVP name="Subscription-Id-Data"/>
+    </AVP>
+    <AVP name="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit" counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Requested-Action" occurrence="1"/>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+       <AVP name="Service-Parameter-Type" />
+       <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+        <AVP name="Other-Party-Id-Type"/>
+        <AVP name="Other-Party-Id-Data" />
+        <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone" occurrence="1" />
+    <AVP name="Traffic-Case" />
+    <AVP name="User-Equipment-Info">
+        <AVP name="User-Equipment-Info-Type"/>
+        <AVP name="User-Equipment-Info-Value"/>
+    </AVP>
+   <AVP name="Destination-Host"/>
+   <AVP name="CC-Correlation-Id"/>
+   <AVP name="Acct-Multi-Session-Id"/>
+   <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+           <AVP name="Tariff-Change-Usage"/>
+           <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+           </AVP>
+ 
+           <AVP name="CC-Time"/>
+           <AVP name="CC-Total-Octets"/>
+           <AVP name="CC-Input-Octets"/>
+           <AVP name="CC-Output-Octets"/>
+           <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;">
+      <AVP name="Requested-Service-Unit">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+         <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                 <AVP name="Value-Digits"/>
+                 <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Service-Identifier"/>
+      <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+      </AVP>
+
+      <AVP name="Service-Provider-Id" /> 
+
+      <AVP name="Traffic-Case" />
+
+      <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;">
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+      </AVP>
+
+    </AVP>   <!-- Multiple service credit control -->
+    <AVP name="User-Name"/>
+    <AVP name="Termination-Cause"/>
+ </Request>
+<!-- SCAPv2 Direct Request Ends -->
+
+<!-- SCAPv2 Refund Request -->
+  <!-- Note : Request name should not be changed -->
+  <Request name="SCAPv2-Refund" ignoreMandatoryFlag="false">
+   <!-- Condition tag(s) could be added here
+        Example: <Condition key="Origin-Realm" value="myrealm.operator.com"/>
+   -->
+     <Condition key="Requested-Action" value="1" comment="Refund Requested Action"/>
+ 
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Destination-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="Service-Context-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" occurrence="1"/>
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+        <AVP name="Subscription-Id-Type" />
+        <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit" counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Requested-Action" occurrence="1"/>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info"  >
+       <AVP name="Service-Parameter-Type" />
+       <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location"/>
+    <AVP name="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+        <AVP name="Other-Party-Id-Type" />
+        <AVP name="Other-Party-Id-Data" />
+        <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" />
+    <AVP name="3GPP-MS-TimeZone" occurrence="1" />
+    <AVP name="Traffic-Case" />
+    <AVP name="User-Equipment-Info">
+        <AVP name="User-Equipment-Info-Type"/>
+        <AVP name="User-Equipment-Info-Value"/>
+    </AVP>
+   <AVP name="Destination-Host"/>
+   <AVP name="CC-Correlation-Id"/>
+   <AVP name="Acct-Multi-Session-Id"/>
+   <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+           <AVP name="Tariff-Change-Usage"/>
+           <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+            </AVP>
+            <AVP name="CC-Time"/>
+            <AVP name="CC-Total-Octets"/>
+            <AVP name="CC-Input-Octets"/>
+            <AVP name="CC-Output-Octets"/>
+            <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;">
+      <AVP name="Requested-Service-Unit">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+         <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                 <AVP name="Value-Digits"/>
+                 <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Service-Identifier"/>
+      <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+      </AVP>
+
+      <AVP name="Service-Provider-Id" /> 
+
+      <AVP name="Traffic-Case" />
+
+      <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;">
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+      </AVP>
+
+    </AVP>   <!-- Multiple service credit control -->
+    <AVP name="User-Name"/>
+    <AVP name="Termination-Cause"/>
+ </Request>
+<!-- SCAPv2 Refund Request Ends -->
+
+<!-- SCAPv2 Balance Check -->
+ <Request name="SCAPv2_Balance_Check" ignoreMandatoryFlag="false">
+    <Condition key="Requested-Action" value="2" comment="Balance Check"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Destination-Realm"/>
+    <AVP name="Destination-Host"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="Service-Context-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Event-Timestamp"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Requested-Action"/>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+        <AVP name="Subscription-Id-Type" />
+        <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+       <AVP name="Service-Parameter-Type" />
+       <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Account-Location"/>
+    <AVP name="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+        <AVP name="Other-Party-Id-Type" />
+        <AVP name="Other-Party-Id-Data" />
+        <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" />
+    <AVP name="3GPP-MS-TimeZone"/>
+    <AVP name="Traffic-Case" />
+    <AVP name="User-Equipment-Info">
+       <AVP name="User-Equipment-Info-Type"/>
+       <AVP name="User-Equipment-Info-Value"/>
+    </AVP>
+
+ </Request>
+ <!-- SCAPv2 Balance Check Request Ends -->
+ 
+<!-- SCAPv2 Price Enquiry --> 
+<Request name="SCAPv2_Price_Enquiry" ignoreMandatoryFlag="false">
+    <Condition key="Requested-Action" value="3" comment="Price Enquiry"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Destination-Host"/>
+    <AVP name="Destination-Realm"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="Service-Context-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Event-Timestamp"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Requested-Action"/>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+        <AVP name="Subscription-Id-Type" />
+        <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info"  >
+       <AVP name="Service-Parameter-Type" />
+       <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Account-Location"/>
+    <AVP name="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+        <AVP name="Other-Party-Id-Type" />
+        <AVP name="Other-Party-Id-Data" />
+        <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" />
+    <AVP name="3GPP-MS-TimeZone"/>
+    <AVP name="Traffic-Case" />
+    <AVP name="User-Equipment-Info">
+        <AVP name="User-Equipment-Info-Type"/>
+        <AVP name="User-Equipment-Info-Value"/>
+    </AVP>
+
+ </Request>
+  <!-- SCAPv2 Price Enquiry Request Ends -->
+
+
+
+<!-- ###############Scapv2 session Request dictionary -->
+
+<!-- SCAPv2 CCR Initial -->
+ <!-- Note : Request name should not be changed -->
+<Request name="SCAPv2-CCR-Initial" ignoreMandatoryFlag="false">
+   
+    <Condition key="CC-Request-Type" value= "1" comment="INITIAL_REQUEST"/>
+   <AVP name="Destination-Host"/>
+    <AVP name="Session-Id" occurrence="1" />
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Destination-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="Service-Context-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" occurrence="1"/>
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>   
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" counter="MSCCcounter" alias="MSCC"  >
+         <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+         <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+         <AVP name="Other-Party-Id" >
+              <AVP name="Other-Party-Id-Type"/>
+              <AVP name="Other-Party-Id-Data" />
+              <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" /> 
+         <AVP name="Traffic-Case" />
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+              <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+    
+    </AVP >
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone" occurrence="1" />
+    <AVP name="Traffic-Case" />
+</Request>    
+<!-- SCAPv2 CCR Initial Ends -->
+
+
+<!-- SCAPv2 CCR Update -->
+ <!-- Note : Request name should not be changed -->
+<Request name="SCAPv2-CCR-Update" ignoreMandatoryFlag="false">
+    <Condition key="CC-Request-Type" value="2" comment="update"/>
+
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Destination-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="Service-Context-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Destination-Host"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>     
+    <AVP name="Used-Service-Unit" counter="USUcounter" alias="USU">
+         <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" counter="MSCCcounter" alias="MSCC" >
+         <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+         </AVP>
+    <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;" counter="USUcounter" alias="USU">
+        <AVP name="Tariff-Change-Usage"/>
+        <AVP name="CC-Time"/>
+        <AVP name="CC-Money"> 
+             <AVP name="Unit-Value">
+                  <AVP name="Value-Digits"/>
+                  <AVP name="Exponent" />
+             </AVP>
+             <AVP name="Currency-Code"/>
+        </AVP>
+        <AVP name="CC-Total-Octets"/>
+        <AVP name="CC-Input-Octets"/>
+        <AVP name="CC-Output-Octets"/>
+        <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="Traffic-Case" />
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+    </AVP>
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone" />
+    <AVP name="Traffic-Case" />
+</Request>    
+    <!-- SCAPv2 CCR Update Ends -->
+
+<!-- SCAPv2 CCR Terminate -->
+ <!-- Note : Request name should not be changed -->
+<Request name="SCAPv2-CCR-Termination" ignoreMandatoryFlag="false">
+   <Condition key="CC-Request-Type" value="3" comment="termination"/>
+
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Destination-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="Service-Context-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Destination-Host"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Termination-Cause"/>
+    <AVP name="Used-Service-Unit" mapping="list" listSep="&#255;" counter="USUcounter" alias="USU">
+        <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>    
+    <AVP name="Multiple-Services-Indicator"/> 
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" counter="MSCCcounter" alias="MSCC" >
+         <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;" counter="USUcounter" alias="USU">
+              <AVP name="Tariff-Change-Usage"/>
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+          <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+          <AVP name="Other-Party-Id" >
+               <AVP name="Other-Party-Id-Type"/>
+               <AVP name="Other-Party-Id-Data" />
+               <AVP name="Other-Party-Id-Nature" />
+          </AVP>
+          <AVP name="Service-Provider-Id" /> 
+          <AVP name="Traffic-Case" />
+          <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+               <AVP name="Service-Parameter-Type" />
+               <AVP name="Service-Parameter-Value" />
+          </AVP>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone" />
+    <AVP name="Traffic-Case" />
+</Request>    
+<!-- SCAPv2 CCR Terminate Ends -->
+
+
+<!-- To handle AVPs if the Requested Action AVP itself is not coming in the incoming request --> 
+<!-- SCAPv2  Event CCR --> 
+<Request name="SCAPv2-Event-CCR" ignoreMandatoryFlag="false">
+  <Condition key="Command-Code" value="272" comment="Default"/>
+    <AVP name="Session-Id" />
+    <AVP name="Origin-Host" />
+    <AVP name="Origin-Realm" />
+    <AVP name="Destination-Realm" />
+    <AVP name="Auth-Application-Id" />
+    <AVP name="Service-Context-Id" />
+    <AVP name="CC-Request-Type"  />
+    <AVP name="CC-Request-Number" />
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list" listSep="&#255;" alias="Subscription-Id" counter="SubscriptionIdCounter" >
+        <AVP name="Subscription-Id-Type"/>
+        <AVP name="Subscription-Id-Data"/>
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Requested-Action" />
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+       <AVP name="Service-Parameter-Type" />
+       <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+        <AVP name="Other-Party-Id-Type"/>
+        <AVP name="Other-Party-Id-Data" />
+        <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone"  />
+    <AVP name="Traffic-Case" />
+    <AVP name="User-Equipment-Info">
+        <AVP name="User-Equipment-Info-Type"/>
+        <AVP name="User-Equipment-Info-Value"/>
+    </AVP>
+   <AVP name="Destination-Host"/>
+   <AVP name="CC-Correlation-Id"/>
+   <AVP name="Acct-Multi-Session-Id"/>
+   <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+           <AVP name="Tariff-Change-Usage"/>
+            <AVP name="CC-Time"/>
+            <AVP name="CC-Total-Octets"/>
+            <AVP name="CC-Input-Octets"/>
+            <AVP name="CC-Output-Octets"/>
+            <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" >
+      <AVP name="Requested-Service-Unit">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Used-Service-Unit" mapping="list" listSep="&#254;">
+         <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                 <AVP name="Value-Digits"/>
+                 <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+      </AVP>
+
+      <AVP name="Service-Identifier"/>
+      <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+      </AVP>
+
+      <AVP name="Service-Provider-Id" /> 
+
+      <AVP name="Traffic-Case" />
+
+      <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;">
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+      </AVP>
+
+    </AVP>   <!-- Multiple service credit control -->
+    <AVP name="User-Name"/>
+    <AVP name="Termination-Cause"/>
+ </Request> 
+ 
+
+
+
+
+
+
+<!-- ############################################## SCAPv2 CCA Direct Debit ################################## -->
+ <!-- Response for Direct Debit CCR Request -->
+ <Response name="SCAPv2-DirectDebit-CCA" ignoreMandatoryFlag="false">
+    <Condition key="Requested-Action" value="0" comment="Direct Debit Requested Action"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Result-Code"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Granted-Service-Unit" alias="Granted$">
+         <AVP name="Tariff-Time-Change" />
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Cost-Information" alias="Cost-Information">
+         <AVP name="Unit-Value">
+              <AVP name="Value-Digits"/>
+              <AVP name="Exponent" />
+         </AVP>
+         <AVP name="Currency-Code"/>
+         <AVP name="Cost-Unit" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+     <AVP name="Session-Id"/>
+         <AVP name="Origin-Host"/>
+         <AVP name="Origin-Realm"/>
+         <AVP name="Destination-Realm"/>
+         <AVP name="Auth-Application-Id"/>
+         <AVP name="Service-Context-Id"/>
+         <AVP name="CC-Request-Type"/>
+         <AVP name="CC-Request-Number"/>
+         <AVP name="Origin-State-Id"/>
+         <AVP name="Event-Timestamp"/>
+         <AVP name="Subscription-Id" mapping="list" listSep="&#257;" alias="Subscription-Id">
+              <AVP name="Subscription-Id-Type"/>
+              <AVP name="Subscription-Id-Data"/>
+         </AVP>
+         <AVP name="Service-Identifier"/>
+         <AVP name="Requested-Service-Unit" counter="RSUcounter" alias="RSU">
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                       <AVP name="Value-Digits"/>
+                       <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+         </AVP>
+         <AVP name="Requested-Action"/>
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#256;" alias="Service-Parameter-Info" >
+                 <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+         <AVP name="Proxy-Info">
+              <AVP name="Proxy-Host"/>
+              <AVP name="Proxy-State"/>
+         </AVP>
+         <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+         <AVP name="Account-Location"/>
+         <AVP name="Subscription-Id-Location"/>
+         <AVP name="Other-Party-Id" >
+             <AVP name="Other-Party-Id-Type"/>
+             <AVP name="Other-Party-Id-Data"/>
+             <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" />
+         <AVP name="3GPP-MS-TimeZone"/>
+         <AVP name="Traffic-Case" />
+         <AVP name="User-Equipment-Info">
+             <AVP name="User-Equipment-Info-Type"/>
+             <AVP name="User-Equipment-Info-Value"/>
+         </AVP>
+    </AVP>
+    <AVP name="Result-Code-Extension" />
+ </Response>
+<!-- ############################################## SCAPv2 CCA Direct Debit Ends ########################## -->
+
+<!-- ############################################## SCAPv2 CCA Refund ## ################################## -->
+ <!-- Response for Refund CCR Request -->
+ <Response name="SCAPv2-Refund-CCA" ignoreMandatoryFlag="false">
+    <Condition key="Requested-Action" value="1" comment="Direct Debit Requested Action"/>
+    <AVP name="Session-Id" />
+    <AVP name="Result-Code" />
+    <AVP name="Origin-Host" />
+    <AVP name="Origin-Realm" />
+    <AVP name="Auth-Application-Id" />
+    <AVP name="CC-Request-Type" />
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Cost-Information" alias="Cost-Information">
+         <AVP name="Unit-Value">
+              <AVP name="Value-Digits"/>
+              <AVP name="Exponent" />
+         </AVP>
+         <AVP name="Currency-Code"/>
+         <AVP name="Cost-Unit" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+         <AVP name="Session-Id"/>
+         <AVP name="Origin-Host"/>
+         <AVP name="Origin-Realm"/>
+         <AVP name="Destination-Realm"/>
+         <AVP name="Auth-Application-Id"/>
+         <AVP name="Service-Context-Id"/>
+         <AVP name="CC-Request-Type"/>
+         <AVP name="CC-Request-Number"/>
+         <AVP name="Origin-State-Id"/>
+         <AVP name="Event-Timestamp"/>
+         <AVP name="Subscription-Id" mapping="list" listSep="&#257;" alias="Subscription-Id">
+              <AVP name="Subscription-Id-Type"/>
+              <AVP name="Subscription-Id-Data"/>
+         </AVP>
+         <AVP name="Service-Identifier"/>
+         <AVP name="Requested-Service-Unit" counter="RSUcounter" alias ="RSU">
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+         </AVP>
+         <AVP name="Requested-Action"/>
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#256;" alias="Service-Parameter-Info" >
+              <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+         <AVP name="Proxy-Info" alias="Proxy-Info">
+              <AVP name="Proxy-Host"/>
+              <AVP name="Proxy-State"/>
+         </AVP>
+         <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+         <AVP name="Account-Location" alias="Account-Location"/>
+         <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+         <AVP name="Other-Party-Id" >
+             <AVP name="Other-Party-Id-Type" />
+             <AVP name="Other-Party-Id-Data" />
+             <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" />
+         <AVP name="3GPP-MS-TimeZone"/>
+         <AVP name="Traffic-Case" />
+         <AVP name="User-Equipment-Info">
+             <AVP name="User-Equipment-Info-Type"/>
+             <AVP name="User-Equipment-Info-Value"/>
+         </AVP>
+    </AVP>
+    <AVP name="Result-Code-Extension" />
+ </Response>
+<!-- ############################################## SCAPv2 CCA Refund Ends ############################ -->
+
+
+   <!-- Response for Balance Check -->
+ <Response name="SCAPv2_Balance_Check_CCA" ignoreMandatoryFlag="true">
+    <Condition key="Requested-Action" value="2" comment="Response for Balance Check"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Result-Code"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+         <AVP name="Requested-Action"/>
+    </AVP>
+ </Response>
+
+  <!-- Response for PriceEnquiry -->
+ <Response name="SCAPv2_Price_Enquiry_CCA" ignoreMandatoryFlag="true">
+    <Condition key="Requested-Action" value="3" comment="Response for Price Enquiry"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Result-Code"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+         <AVP name="Requested-Action"/>
+    </AVP>
+ </Response>
+ 
+ 
+ 
+ 
+
+<!-- ###############Scapv2 session Response dictionary -->
+
+
+
+
+
+
+<!-- SCAPv2 CCA Initial -->
+ <!-- Note : Request name should not be changed -->
+<Response name="SCAPv2-CCA-Initial" ignoreMandatoryFlag="false">
+    <Condition key="CC-Request-Type" value="1" comment="intial"/>
+
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Result-Code" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Granted-Service-Unit" alias="GSU">
+         <AVP name="Tariff-Time-Change" />
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>  
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>   
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" alias="MSCC">
+         <AVP name="Granted-Service-Unit" alias="GSU">
+              <AVP name="Tariff-Time-Change" />
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+         </AVP>     
+         <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+         <AVP name="Validity-Time" />
+         <AVP name="Result-Code"/>
+	 <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+         	<AVP name="Service-Parameter-Type" />
+         	<AVP name="Service-Parameter-Value" />
+         </AVP>
+         <AVP name="Final-Unit-Indication" alias="FUI">
+              <AVP name="Final-Unit-Action"/>
+         </AVP>
+         <AVP name="Result-Code-Extension" />
+         <AVP name="Failed-AVP" mapping="list" listSep="&#254;" alias="Failed-AVP" >
+        <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+         <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+         <AVP name="Other-Party-Id" >
+              <AVP name="Other-Party-Id-Type"/>
+              <AVP name="Other-Party-Id-Data" />
+              <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" /> 
+         <AVP name="Traffic-Case" />
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+              <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+         </AVP>
+         <AVP name="Time-Quota-Threshold" />
+
+         <AVP name="Volume-Quota-Threshold" />
+
+         <AVP name="Unit-Quota-Threshold" />
+    </AVP>
+   <AVP name="Final-Unit-Indication" alias="FUI">
+     <AVP name="Final-Unit-Action"/>
+   </AVP>
+
+    <AVP name="Credit-Control-Failure-Handling" />
+    
+     <AVP name="CC-Session-Failover" />
+     
+    <AVP name="Validity-Time" />
+
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP">
+     <AVP name="Destination-Host"/>
+    <AVP name="Session-Id"  />
+    <AVP name="Origin-Host" />
+    <AVP name="Origin-Realm" />
+    <AVP name="Destination-Realm" />
+    <AVP name="Auth-Application-Id" />
+    <AVP name="Service-Context-Id"/>
+    <AVP name="CC-Request-Type"  />
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list" listSep="&#254;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>   
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#254;" alias="MSCC"  >
+         <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+         <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+         <AVP name="Other-Party-Id" >
+              <AVP name="Other-Party-Id-Type"/>
+              <AVP name="Other-Party-Id-Data" />
+              <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" /> 
+         <AVP name="Traffic-Case" />
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+              <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+    
+    </AVP >
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone" />
+    <AVP name="Traffic-Case" />
+    </AVP> 
+    <AVP name="Result-Code-Extension" />
+    <AVP name="Time-Quota-Threshold" />
+
+    <AVP name="Volume-Quota-Threshold" />
+
+    <AVP name="Unit-Quota-Threshold" />
+</Response>
+<!-- SCAPv2 CCA Initial Ends -->
+
+
+
+    
+
+
+
+
+
+<!-- SCAPv2 CCA Update -->
+ <!-- Note : Request name should not be changed -->
+<Response name="SCAPv2-CCA-Update" ignoreMandatoryFlag="false">
+    <Condition key="CC-Request-Type" value="2" comment="update"/>
+
+    <AVP name="Session-Id" occurrence="1"/>
+    <AVP name="Result-Code" occurrence="1"/>
+    <AVP name="Origin-Host" occurrence="1"/>
+    <AVP name="Origin-Realm" occurrence="1"/>
+    <AVP name="Auth-Application-Id" occurrence="1"/>
+    <AVP name="CC-Request-Type"  occurrence="1"/>
+    <AVP name="CC-Request-Number" occurrence="1"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Granted-Service-Unit" alias="GSU">
+         <AVP name="Tariff-Time-Change" />
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>     
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#255;" alias="MSCC">
+         <AVP name="Granted-Service-Unit" alias="GSU">
+              <AVP name="Tariff-Time-Change" />
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+         <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+         <AVP name="Validity-Time" />
+
+         <AVP name="Result-Code"/>
+	 <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+         	<AVP name="Service-Parameter-Type" />
+	        <AVP name="Service-Parameter-Value" />
+     	 </AVP>
+
+         <AVP name="Final-Unit-Indication" alias="FUI">
+         <AVP name="Final-Unit-Action"/>
+         </AVP>
+
+         <AVP name="Cost-Information" alias="Cost-Information">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+              <AVP name="Cost-Unit" />
+         </AVP>
+         <AVP name="Result-Code-Extension" />
+         <AVP name="Failed-AVP" mapping="list" listSep="&#254;" alias="Failed-AVP" >
+         <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+         </AVP>
+    <AVP name="Used-Service-Unit" mapping="list"  counter="USUcounter" alias="USU">
+        <AVP name="Tariff-Change-Usage"/>
+        <AVP name="CC-Time"/>
+        <AVP name="CC-Money"> 
+             <AVP name="Unit-Value">
+                  <AVP name="Value-Digits"/>
+                  <AVP name="Exponent" />
+             </AVP>
+             <AVP name="Currency-Code"/>
+        </AVP>
+        <AVP name="CC-Total-Octets"/>
+        <AVP name="CC-Input-Octets"/>
+        <AVP name="CC-Output-Octets"/>
+        <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="Traffic-Case" />
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+    </AVP>
+    
+         </AVP>
+         <AVP name="Time-Quota-Threshold" />
+
+         <AVP name="Volume-Quota-Threshold" />
+
+         <AVP name="Unit-Quota-Threshold" />
+    </AVP>
+    <AVP name="Cost-Information" alias="Cost-Information">
+         <AVP name="Unit-Value">
+              <AVP name="Value-Digits"/>
+              <AVP name="Exponent" />
+         </AVP>
+         <AVP name="Currency-Code"/>
+         <AVP name="Cost-Unit" />
+    </AVP>
+   <AVP name="Final-Unit-Indication" alias="FUI">
+     <AVP name="Final-Unit-Action"/>
+   </AVP>
+
+    <AVP name="Credit-Control-Failure-Handling" />
+    <AVP name="CC-Session-Failover" />
+
+    <AVP name="Validity-Time" />
+
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+    
+    <AVP name="Session-Id" />
+    <AVP name="Origin-Host" />
+    <AVP name="Origin-Realm" />
+    <AVP name="Destination-Realm" />
+    <AVP name="Auth-Application-Id" />
+    <AVP name="Service-Context-Id" />
+    <AVP name="CC-Request-Type"  />
+    <AVP name="CC-Request-Number" />
+    <AVP name="Destination-Host"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list"  listSep="&#254;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>     
+    <AVP name="Used-Service-Unit" counter="USUcounter" alias="USU">
+         <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Multiple-Services-Indicator"/>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#254;" alias="MSCC">
+         <AVP name="Requested-Service-Unit"  counter="RSUcounter" alias="RSU">
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money">
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+ 
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+         </AVP>
+    <AVP name="Used-Service-Unit" mapping="list"  counter="USUcounter" alias="USU">
+        <AVP name="Tariff-Change-Usage"/>
+        <AVP name="CC-Time"/>
+        <AVP name="CC-Money"> 
+             <AVP name="Unit-Value">
+                  <AVP name="Value-Digits"/>
+                  <AVP name="Exponent" />
+             </AVP>
+             <AVP name="Currency-Code"/>
+        </AVP>
+        <AVP name="CC-Total-Octets"/>
+        <AVP name="CC-Input-Octets"/>
+        <AVP name="CC-Output-Octets"/>
+        <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="Traffic-Case" />
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+        <AVP name="Service-Parameter-Type" />
+        <AVP name="Service-Parameter-Value" />
+    </AVP>
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone"  />
+    <AVP name="Traffic-Case" />
+    
+    </AVP> 
+    <AVP name="Result-Code-Extension" />
+    <AVP name="Time-Quota-Threshold" />
+
+    <AVP name="Volume-Quota-Threshold" />
+
+    <AVP name="Unit-Quota-Threshold" />
+</Response>    
+
+<!-- SCAPv2 CCA Update Ends -->
+
+
+
+
+
+
+
+<!-- SCAPv2 CCA Terminate -->
+ <!-- Note : Request name should not be changed -->
+
+ <Response name="SCAPv2-CCA-Termination" ignoreMandatoryFlag="false">
+    <Condition key="CC-Request-Type" value="3" comment="termination"/>
+
+    <AVP name="Session-Id" occurrence="1" />
+    <AVP name="Result-Code" occurrence="1" />
+    <AVP name="Origin-Host" occurrence="1" />
+    <AVP name="Origin-Realm" occurrence="1" />
+    <AVP name="Auth-Application-Id" occurrence="1" />
+    <AVP name="CC-Request-Type" occurrence="1" />
+    <AVP name="CC-Request-Number" occurrence="1" />
+    <AVP name="Origin-State-Id" />
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#255;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Multiple-Services-Credit-Control" mapping="list"    listSep="&#255;" alias="MSCC">
+        <AVP name="Service-Identifier"  alias="Service-Identifier" />
+        <AVP name="Result-Code"  />
+	<AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+		<AVP name="Service-Parameter-Type" />
+		<AVP name="Service-Parameter-Value" />
+	</AVP>
+        <AVP name="Cost-Information" alias="Cost-Information">
+             <AVP name="Unit-Value">
+                  <AVP name="Value-Digits" />
+                  <AVP name="Exponent" />
+             </AVP>
+             <AVP name="Currency-Code" />
+             <AVP name="Cost-Unit" />
+        </AVP>
+        <AVP name="Result-Code-Extension" />
+        <AVP name="Failed-AVP" mapping="list" listSep="&#254;" alias="Failed-AVP">
+         <AVP name="Used-Service-Unit" mapping="list"  counter="USUcounter" alias="USU">
+              <AVP name="Tariff-Change-Usage"/>
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+          <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+          <AVP name="Other-Party-Id" >
+               <AVP name="Other-Party-Id-Type"/>
+               <AVP name="Other-Party-Id-Data" />
+               <AVP name="Other-Party-Id-Nature" />
+          </AVP>
+          <AVP name="Service-Provider-Id" /> 
+          <AVP name="Traffic-Case" />
+          <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+               <AVP name="Service-Parameter-Type" />
+               <AVP name="Service-Parameter-Value" />
+          </AVP>
+        
+        </AVP>
+    </AVP>
+    <AVP name="Credit-Control-Failure-Handling" />
+    <AVP name="Cost-Information" alias="Cost-Information">
+         <AVP name="Unit-Value">
+              <AVP name="Value-Digits" />
+              <AVP name="Exponent" />
+         </AVP>
+         <AVP name="Currency-Code" />
+         <AVP name="Cost-Unit" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host" />
+         <AVP name="Proxy-State" />
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP">
+    
+    <AVP name="Session-Id" />
+    <AVP name="Origin-Host" />
+    <AVP name="Origin-Realm" />
+    <AVP name="Destination-Realm" />
+    <AVP name="Auth-Application-Id" />
+    <AVP name="Service-Context-Id" />
+    <AVP name="CC-Request-Type"  />
+    <AVP name="CC-Request-Number" />
+    <AVP name="Destination-Host"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Event-Timestamp" />
+    <AVP name="Subscription-Id" mapping="list"  listSep="&#254;" alias="Subscription-Id" counter="SubscriptionIdCounter">
+         <AVP name="Subscription-Id-Type" />
+         <AVP name="Subscription-Id-Data" />
+    </AVP>
+    <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+    <AVP name="Termination-Cause"/>
+    <AVP name="Used-Service-Unit" mapping="list"  counter="USUcounter" alias="USU">
+        <AVP name="Tariff-Change-Usage"/>
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>    
+    <AVP name="Multiple-Services-Indicator"/> 
+    <AVP name="Multiple-Services-Credit-Control" mapping="list" listSep="&#254;" alias="MSCC">
+         <AVP name="Used-Service-Unit" mapping="list"  counter="USUcounter" alias="USU">
+              <AVP name="Tariff-Change-Usage"/>
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                        <AVP name="Value-Digits"/>
+                        <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+          </AVP>    
+          <AVP name="Service-Identifier"  alias="Service-Identifier"/>
+          <AVP name="Other-Party-Id" >
+               <AVP name="Other-Party-Id-Type"/>
+               <AVP name="Other-Party-Id-Data" />
+               <AVP name="Other-Party-Id-Nature" />
+          </AVP>
+          <AVP name="Service-Provider-Id" /> 
+          <AVP name="Traffic-Case" />
+          <AVP name="Service-Parameter-Info" mapping="list" listSep="&#253;" alias="Service-Parameter-Info" >
+               <AVP name="Service-Parameter-Type" />
+               <AVP name="Service-Parameter-Value" />
+          </AVP>
+    </AVP>
+    <AVP name="Service-Parameter-Info" mapping="list" listSep="&#254;" alias="Service-Parameter-Info" >
+         <AVP name="Service-Parameter-Type" />
+         <AVP name="Service-Parameter-Value" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+         <AVP name="Proxy-Host"/>
+         <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Account-Location" alias="Account-Location"/>
+    <AVP name="Subscription-Id-Location" alias="Subscription-Id-Location"/>
+    <AVP name="Other-Party-Id" >
+         <AVP name="Other-Party-Id-Type"/>
+         <AVP name="Other-Party-Id-Data" />
+         <AVP name="Other-Party-Id-Nature" />
+    </AVP>
+    <AVP name="Service-Provider-Id" /> 
+    <AVP name="3GPP-MS-TimeZone"  />
+    <AVP name="Traffic-Case" />
+    
+    </AVP>
+    <AVP name="Result-Code-Extension" />
+</Response>
+    <!-- SCAPv2 CCA Terminate Ends -->
+
+<!-- SCAPv2 Event CCA -->
+<Response name="SCAPv2-Event-CCA" ignoreMandatoryFlag="false">
+    <Condition key="Command-Code" value="272" comment="Default"/>
+    <AVP name="Session-Id"/>
+    <AVP name="Result-Code"/>
+    <AVP name="Origin-Host"/>
+    <AVP name="Origin-Realm"/>
+    <AVP name="Auth-Application-Id"/>
+    <AVP name="CC-Request-Type"/>
+    <AVP name="CC-Request-Number"/>
+    <AVP name="Origin-State-Id"/>
+    <AVP name="Granted-Service-Unit" alias="Granted$">
+         <AVP name="Tariff-Time-Change" />
+         <AVP name="CC-Time"/>
+         <AVP name="CC-Money"> 
+              <AVP name="Unit-Value">
+                   <AVP name="Value-Digits"/>
+                   <AVP name="Exponent" />
+              </AVP>
+              <AVP name="Currency-Code"/>
+         </AVP>
+         <AVP name="CC-Total-Octets"/>
+         <AVP name="CC-Input-Octets"/>
+         <AVP name="CC-Output-Octets"/>
+         <AVP name="CC-Service-Specific-Units"/>
+    </AVP>
+    <AVP name="Cost-Information" alias="Cost-Information">
+         <AVP name="Unit-Value">
+              <AVP name="Value-Digits"/>
+              <AVP name="Exponent" />
+         </AVP>
+         <AVP name="Currency-Code"/>
+         <AVP name="Cost-Unit" />
+    </AVP>
+    <AVP name="Proxy-Info" alias="Proxy-Info">
+        <AVP name="Proxy-Host"/>
+        <AVP name="Proxy-State"/>
+    </AVP>
+    <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+    <AVP name="Failed-AVP" mapping="list" listSep="&#255;" alias="Failed-AVP" >
+     <AVP name="Session-Id"/>
+         <AVP name="Origin-Host"/>
+         <AVP name="Origin-Realm"/>
+         <AVP name="Destination-Realm"/>
+         <AVP name="Auth-Application-Id"/>
+         <AVP name="Service-Context-Id"/>
+         <AVP name="CC-Request-Type"/>
+         <AVP name="CC-Request-Number"/>
+         <AVP name="Origin-State-Id"/>
+         <AVP name="Event-Timestamp"/>
+         <AVP name="Subscription-Id" mapping="list" listSep="&#257;" alias="Subscription-Id">
+              <AVP name="Subscription-Id-Type"/>
+              <AVP name="Subscription-Id-Data"/>
+         </AVP>
+         <AVP name="Service-Identifier"/>
+         <AVP name="Requested-Service-Unit" alias="RSU">
+              <AVP name="CC-Time"/>
+              <AVP name="CC-Money"> 
+                   <AVP name="Unit-Value">
+                       <AVP name="Value-Digits"/>
+                       <AVP name="Exponent" />
+                   </AVP>
+                   <AVP name="Currency-Code"/>
+              </AVP>
+              <AVP name="CC-Total-Octets"/>
+              <AVP name="CC-Input-Octets"/>
+              <AVP name="CC-Output-Octets"/>
+              <AVP name="CC-Service-Specific-Units"/>
+         </AVP>
+         <AVP name="Requested-Action"/>
+         <AVP name="Service-Parameter-Info" mapping="list" listSep="&#256;" alias="Service-Parameter-Info" >
+                 <AVP name="Service-Parameter-Type" />
+              <AVP name="Service-Parameter-Value" />
+         </AVP>
+         <AVP name="Proxy-Info">
+              <AVP name="Proxy-Host"/>
+              <AVP name="Proxy-State"/>
+         </AVP>
+         <AVP name="Route-Record" mapping="list" listSep="&#258;" alias="Route-Record"/>
+         <AVP name="Account-Location"/>
+         <AVP name="Subscription-Id-Location"/>
+         <AVP name="Other-Party-Id" >
+             <AVP name="Other-Party-Id-Type"/>
+             <AVP name="Other-Party-Id-Data"/>
+             <AVP name="Other-Party-Id-Nature" />
+         </AVP>
+         <AVP name="Service-Provider-Id" />
+         <AVP name="3GPP-MS-TimeZone"/>
+         <AVP name="Traffic-Case" />
+         <AVP name="User-Equipment-Info">
+             <AVP name="User-Equipment-Info-Type"/>
+             <AVP name="User-Equipment-Info-Value"/>
+         </AVP>
+    </AVP>
+    <AVP name="Result-Code-Extension" />
+ </Response>
+
+
+</Protocol>

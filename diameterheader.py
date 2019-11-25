@@ -2,6 +2,33 @@ from struct import pack, unpack
 from binascii import hexlify, unhexlify
 
 
+"""
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |    Version    |                 Message Length                |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ | Command Flags |                  Command Code                 |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                         Application-ID                        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                      Hop-by-Hop Identifier                    |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                      End-to-End Identifier                    |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+4 Octets = 4 * 8 bits = 32 bytes
+
+Version => 8 bits
+MessageLength => 24 bits = 3 bytes
+CommandFlags => 8 bits
+CommandCode => 24 bits = 3 bytes
+Application-ID => 32 bits = 4 bytes
+Hop-By-Hop Identifier => 32 bits = 4 bytes
+End-to-End Identifier => 32 bits = 4 bytes
+"""
+
+
 class Header:
     def __init__(self,
                  version,
@@ -27,6 +54,21 @@ class Header:
     @version.setter
     def version(self, val):
         self._version = val
+
+    @staticmethod
+    def getLength():
+        return 20
+
+    def encode(self):
+        encoded = bytearray()
+        encoded[0:] = pack('>B', self._version)
+        encoded[1:] = int(self._msglength).to_bytes(3, byteorder='big')
+        encoded[5:] = pack('>B',  self._cmdflags)
+        encoded[6:] = int(self._cmdcode).to_bytes(3, byteorder='big')
+        encoded[9:] = pack('>I', self._appId)
+        encoded[13:] = pack('>I', self._hopByhopId)
+        encoded[17:] = pack('>I', self._endToEndId)
+        return encoded
 
     def decode(self, buff):
         if len(buff)/2 < self._headerlength:
