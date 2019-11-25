@@ -1,3 +1,6 @@
+from .datatype import Type
+from struct import pack, unpack
+from binascii import hexlify, unhexlify
 """
   Time
       The Time format is derived from the OctetString AVP Base Format.
@@ -13,3 +16,30 @@
       This procedure MUST be supported by all DIAMETER nodes.
 
 """
+
+
+class Time(Type):
+
+    def __init__(self, value):
+        self._value = value
+        self._timedelta = 2208988800
+
+    def encode(self):
+        encoded = pack('>I', self._value + self._timedelta)
+        return encoded
+
+    def len(self):
+        return self.__len__()
+
+    def decode(self):
+        pass
+
+    def decodeFromBytes(self, buff):
+        decoded = unpack('>I', unhexlify(buff))[0]
+        return decoded - self._timedelta
+
+    def getpadding(self):
+        return 0
+
+    def __len__(self):
+        return 4

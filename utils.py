@@ -26,3 +26,7 @@ types = {
     "Unsigned32": None,
     "Unsigned64": None,
 }
+
+
+def findType(avpcode=None, avpname=None, vendorid=None):
+    pass

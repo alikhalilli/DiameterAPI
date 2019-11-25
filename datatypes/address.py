@@ -80,6 +80,7 @@ class Address(OctetString):
     def decode(self):
         pass
 
+    @staticmethod
     def decodeFromBytes(self, buff):
         self._addrType = buff[:2]
         if self._addrType == addressFamily['IPv4']['val']:
@@ -92,3 +93,6 @@ class Address(OctetString):
 
     def len(self):
         return self.__len__()
+
+    def getpadding(self):
+        super().getpadding(self)
