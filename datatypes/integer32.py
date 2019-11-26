@@ -38,6 +38,9 @@ class Integer32(Type):
         return unpack('>I', unhexlify(self.value))
 
     def len(self):
+        return self.__len__()
+
+    def __len__(self):
         return 4
 
     def getpadding(self):

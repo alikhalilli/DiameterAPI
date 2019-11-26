@@ -46,19 +46,19 @@ class AVP:
         self._flags = flags
         self._vendorID = vendorID
         self._data = data
-        self._length = self._hlen + len(data)
+        self._length = self._hlen() + len(data)
         self._padding = data.getpadding()
         self._encoded = None
 
     def encode(self):
         encoded = bytearray()
         encoded[0:] = pack('>I', self._code)  # 0, 1, 2, 3
-        encoded[4] = pack('>B', self._flags)  # 4
+        encoded[4:] = pack('>B', self._flags)  # 4
         encoded[5:] = int(self.length).to_bytes(3, byteorder='big')
         # pack('>I', self.length)[1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
-        if self._vendorID | (self.flags & avpflags['vendor']):
+        if self._vendorID or (self.flags & avpflags['vendor']):
             encoded[8:] = pack('>I', self._vendorID)  # 8, 9, 10, 11
-        encoded[self._hlen:] = self._data.encode()
+        encoded[self._hlen():] = self._data.encode()
         encoded[-1:] += pack(f">{self.padding}B",
                              *(0 for i in range(self._padding)))
         self._encoded = encoded
@@ -116,7 +116,7 @@ class AVP:
         return self._length + self._data.getpadding()
 
     def _hlen(self):
-        if self._vendor | (self._flags & avpflags['vendor']):
+        if self._vendorID or (self._flags & avpflags['vendor']):
             return 12
         return 8
 

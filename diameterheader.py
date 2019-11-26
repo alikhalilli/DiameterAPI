@@ -79,7 +79,7 @@ class Header:
     def version(self, val):
         self._version = val
 
-    @staticmethod
+    @property
     def length(self):
         return self._msglength
 
@@ -90,3 +90,14 @@ class Header:
     @staticmethod
     def headerlength(self=None):
         return 20
+
+    def __repr__(self):
+        return f"""
+        Version: {self._version}
+        Message Length: {self._msglength}
+        Flags: {self._cmdflags}
+        Command Code: {self._cmdcode}
+        AppID: {self._appId}
+        HopByHopId: {self._hopByhopId}
+        EndToEndId: {self._endToEndId}
+        """

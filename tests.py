@@ -23,16 +23,16 @@ if __name__ == "__main__":
     )
     m.addNewAVP(AVP(code=231,
                     flags=avpflags['vendor'] | avpflags['mandatory'],
-                    vendor=22,
+                    vendorID=22,
                     data=Integer32(12)))
     m.addNewAVP(AVP(233,
                     flags=avpflags['vendor'],
-                    vendor=77,
+                    vendorID=77,
                     data=OctetString("Salam")))
     m.addNewAVP(AVP(
         code=263,
         flags=avpflags['mandatory'],
-        vendor=None,
+        vendorID=None,
         data=OctetString("grump.example.com:33041;23432;893;0AF3B81")
     ))
     print(m.encode())

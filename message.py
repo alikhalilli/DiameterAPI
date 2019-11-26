@@ -36,3 +36,10 @@ class Message:
         header = self.decodeHeader(buff[:self.header.headerlength()])
         decodedAVPs = [a for a in self.decodeBody(
             buff[self.header.headerlength():])]
+        return (header, decodedAVPs)
+
+    def __repr__(self):
+        return f"""
+        Header: {self.header}
+        AVPs: {[avp for avp in self.avps]}
+        """
