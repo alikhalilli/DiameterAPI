@@ -5,3 +5,4 @@ from .float64 import Float64
 from .octetstring import OctetString
 from .datatype import Type
 from .address import Address
+from .group import Group

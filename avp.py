@@ -1,7 +1,6 @@
 from struct import pack, pack_into, unpack
 from binascii import hexlify, unhexlify
 from datatypes.datatype import Type
-
 from datatypes.integer32 import Integer32
 from datatypes.integer64 import Integer64
 from datatypes.float32 import Float32
@@ -10,6 +9,7 @@ from datatypes.octetstring import OctetString
 from datatypes.diamidentity import DiameterIdentity
 from datatypes.address import Address
 from datatypes.datatype import Type
+from utils import types
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -84,7 +84,7 @@ class AVP:
         # unpack('>I', b'\x00' + bytedata[5:8])
         a.length = int.from_bytes(buff[5:8], byteorder='big')
         a.vendorID = unpack('>I', buff[8:12])
-        a.data = (AVP.getType(a.code, a.vendorID)).decode(buff[12:])
+        a.data = (AVP.getType(a.code, a.vendorID)).decode(buff[12:a.length])
         return a
 
     @staticmethod
@@ -168,10 +168,10 @@ class AVP:
         return f"""
         --------------------------------------
         AVP:
-        Code: {self.code}
-        Flags: {self.flags}
-        Length: {self.length}
-        VendorID: {self.vendor}
-        Data: {self.data},
+        Code: {self._code}
+        Flags: {self._flags}
+        Length: {self._length}
+        VendorID: {self._vendorID}
+        Data: {self._data},
         Whole AVP Encoded: {self.encode()}
         --------------------------------------"""

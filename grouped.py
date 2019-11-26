@@ -40,4 +40,7 @@ class GroupedAVP:
         return encoded
 
     def decodeFromBuffer(self, buff):
-        pass
+        while buff:
+            a = AVP.decodeFromBuffer(buff)
+            buff = buff[len(a):]
+            self._AVPs.append(a)

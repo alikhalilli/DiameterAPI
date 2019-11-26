@@ -24,13 +24,15 @@ class Message:
         return encoded
 
     def decodeHeader(self, buff):
-        return Header()
+        return Header.decode(buff)
 
     def decodeBody(self, buff):
         while buff:
             a = AVP.decodeFromBuffer(buff)
             buff = buff[len(a):]
+            yield a
 
     def decodeFromBytes(self, buff):
-        h = self.decodeHeader(buff[:self.header._headerlength])
-        body = buff[self.header._headerlength:]
+        header = self.decodeHeader(buff[:self.header.headerlength()])
+        decodedAVPs = [a for a in self.decodeBody(
+            buff[self.header.headerlength():])]

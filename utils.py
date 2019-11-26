@@ -1,3 +1,5 @@
+from datatypes.enumerated import Enumerated
+from datatypes.group import Group
 from datatypes.integer32 import Integer32
 from datatypes.integer64 import Integer64
 from datatypes.float32 import Float32
@@ -8,13 +10,13 @@ from datatypes.address import Address
 from datatypes.datatype import Type
 
 types = {
-    "Address": None,
+    "Address": Address,
     "DiameterIdentity": DiameterIdentity,
     "DiameterURI": None,
-    "Enumerated": None,
+    "Enumerated": Enumerated,
     "Float32": Float32,
     "Float64": Float64,
-    "Grouped": None,
+    "Grouped": Group,
     "IPFilterRule": None,
     "IPv4": None,
     "Integer32": Integer32,

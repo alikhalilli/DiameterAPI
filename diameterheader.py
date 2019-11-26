@@ -31,29 +31,20 @@ End-to-End Identifier => 32 bits = 4 bytes
 
 class Header:
     def __init__(self,
-                 cmdflags,
-                 cmdcode,
-                 appId):
-        self._version = 0b1
-        self._headerlength = 20
-        self._msglength = self._headerlength
+                 version=0b1,
+                 msglength=20,
+                 cmdflags=None,
+                 cmdcode=None,
+                 appId=None,
+                 hopByHopId=random.getrandbits(32),
+                 endToEndId=random.getrandbits(32)):
+        self._version = version
+        self._msglength = msglength
         self._cmdflags = cmdflags
         self._cmdcode = cmdcode
         self._appId = appId
-        self._hopByhopId = random.getrandbits(32)
-        self._endToEndId = random.getrandbits(32)
-
-    @property
-    def version(self):
-        return self._version
-
-    @version.setter
-    def version(self, val):
-        self._version = val
-
-    @staticmethod
-    def getLength(self):
-        return self._msglength
+        self._hopByhopId = hopByHopId
+        self._endToEndId = endToEndId
 
     def encode(self):
         encoded = bytearray()
@@ -66,8 +57,9 @@ class Header:
         encoded[16:] = pack('>I', self._endToEndId)
         return encoded
 
-    def decode(self, buff):
-        if len(buff) < self._headerlength:
+    @staticmethod
+    def decode(buff):
+        if len(buff) < Header.headerlength():
             raise ValueError(f"Corrupted data {buff}")
         return Header(
             version=unpack('>B', buff[0])[0],
@@ -78,3 +70,23 @@ class Header:
             hopByHopId=unpack('>I', buff[12:16])[0],
             endToEndId=unpack('>I', buff[16:20])[0]
         )
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, val):
+        self._version = val
+
+    @staticmethod
+    def length(self):
+        return self._msglength
+
+    @length.setter
+    def length(self, val):
+        self._msglength = val
+
+    @staticmethod
+    def headerlength(self=None):
+        return 20
