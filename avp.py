@@ -56,7 +56,7 @@ class AVP:
         encoded[4] = pack('>B', self._flags)  # 4
         encoded[5:] = int(self.length).to_bytes(3, byteorder='big')
         # pack('>I', self.length)[1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
-        if self.vendor | (self.flags & avpflags['vendor']):
+        if self._vendorID | (self.flags & avpflags['vendor']):
             encoded[8:] = pack('>I', self._vendorID)  # 8, 9, 10, 11
         encoded[self._hlen:] = self._data.encode()
         encoded[-1:] += pack(f">{self.padding}B",
@@ -88,21 +88,21 @@ class AVP:
         return a
 
     @staticmethod
-    def getType(avpcode, avpvendor):
+    def getType(avpcode, vendorID):
         return types["Integer"]
 
     @staticmethod
-    def encodeFromObj(avp, application):
+    def encodeFromAVP(avp):
         encoded = bytearray(avp.length)
         encoded[0:] = pack('>I', avp.code)  # 0, 1, 2, 3
         encoded[4:] = pack('>B', avp.flags)  # 4
         # 1:4 bytes = 3bytes ; 5, 6, 7
-        encoded[5:] = pack('>I', avp.length)[
-            1:] if avp.length <= 0xffffff else b'Error'
-        encoded[8:] = pack('>I', avp.vendor)  # 8, 9, 10, 11
+        encoded[5:] = int(avp.length).to_bytes(3, byteorder='big')
+        #pack('>I', avp.length)[1:] if avp.length <= 0xffffff else b'Error'
+        encoded[8:] = pack('>I', avp.vendorID)  # 8, 9, 10, 11
         encoded[12:] = avp.data.encode()
-        encoded[-1:] += pack(f">{avp.data.getPaddingC()}B",
-                             *(0 for i in range(avp.data.getPaddingC())))
+        encoded[-1:] += pack(f">{avp.data.getpadding()}B",
+                             *(0 for i in range(avp.data.getpadding())))
         return encoded
 
     @staticmethod

@@ -1,3 +1,5 @@
+from avp import AVP
+
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -22,8 +24,7 @@ AVP_header_length = 12 bytes [4+1+3+4]
 
 
 class GroupedAVP:
-    def __init__(self):
-        self.a = AVP()
+    def __init__(self, code, flags, ):
         self._AVPs = []
 
     def __len__(self):
