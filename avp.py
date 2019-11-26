@@ -49,6 +49,9 @@ class AVP:
         self._encoded = None
         self._padding = data.getpadding()
 
+    def len(self):
+        return self.__len__()
+
     def __len__(self):
         return self._length + self._data.getpadding()
 
@@ -173,29 +176,3 @@ class AVP:
         Data: {self.data},
         Whole AVP Encoded: {self.encode()}
         --------------------------------------"""
-
-
-if __name__ == "__main__":
-
-    a = AVP(231,
-            flags=avpflags['vendor'] | avpflags['mandatory'],
-            vendor=22,
-            data=Integer32(12))
-    b = AVP(232,
-            flags=avpflags['mandatory'],
-            vendor=333,
-            data=Integer32(333))
-    c = Integer32.decodeFromBytes(b'\x00\x00\x00\x0c')
-    d = AVP(233,
-            flags=avpflags['vendor'],
-            vendor=77,
-            data=OctetString("Salam"))
-    di = AVP(234,
-             flags=avpflags['vendor'],
-             vendor=78,
-             data=DiameterIdentity("aaa://host.example.com:6666;transport=tcp;protocol=diameter"))
-    print(f"data: {a}")
-    print(f"decoded: {c}")
-    print(d)
-    print(di)
-    # print(b)

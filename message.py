@@ -1,21 +1,20 @@
 from diameterheader import Header
+from avp import AVP
 
 
 class Message:
     def __init__(self,
-                 version,
-                 msglength,
                  cmdflags,
                  cmdcode,
-                 appId,
-                 hopByHopId,
-                 endToEndId):
-        self.header = Header(version, msglength, cmdflags,
-                             cmdcode, appId, hopByHopId, endToEndId)
+                 appId):
+        self.header = Header(cmdflags=cmdflags,
+                             cmdcode=cmdcode,
+                             appId=appId)
         self.avps = []
 
     def addNewAVP(self, avp):
         self.avps.append(avp)
+        self.header._msglength += len(avp)
 
     def encode(self):
         encoded = bytearray()
@@ -24,5 +23,14 @@ class Message:
             encoded += avp.encode()
         return encoded
 
-    def decode(self):
-        pass
+    def decodeHeader(self, buff):
+        return Header()
+
+    def decodeBody(self, buff):
+        while buff:
+            a = AVP.decodeFromBuffer(buff)
+            buff = buff[len(a):]
+
+    def decodeFromBytes(self, buff):
+        h = self.decodeHeader(buff[:self.header._headerlength])
+        body = buff[self.header._headerlength:]

@@ -1,6 +1,6 @@
 from struct import pack, unpack
 from binascii import hexlify, unhexlify
-from datatype import Type
+from datatypes.datatype import Type
 
 """
   0                   1                   2                   3

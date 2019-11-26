@@ -31,14 +31,10 @@ End-to-End Identifier => 32 bits = 4 bytes
 
 class Header:
     def __init__(self,
-                 version,
-                 msglength,
                  cmdflags,
                  cmdcode,
-                 appId,
-                 hopByHopId,
-                 endToEndId):
-        self._version = version
+                 appId):
+        self._version = 0b1
         self._headerlength = 20
         self._msglength = self._headerlength
         self._cmdflags = cmdflags
@@ -56,7 +52,7 @@ class Header:
         self._version = val
 
     @staticmethod
-    def getLength():
+    def getLength(self):
         return self._msglength
 
     def encode(self):
