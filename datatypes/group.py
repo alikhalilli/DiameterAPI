@@ -50,23 +50,3 @@ class Group(Type):
 
     def getpadding(self):
         return 0
-
-
-class GroupedAVP:
-    def __init__(self):
-        self._AVPs = []
-
-    def __len__(self):
-        length = 0
-        for avp in self._AVPs:
-            length += len(avp)
-        return length
-
-    def encode(self):
-        encoded = bytearray()
-        for avp in self._AVPs:
-            encoded += avp.encode()
-        return encoded
-
-    def decodeFromBuffer(self, buff):
-        pass

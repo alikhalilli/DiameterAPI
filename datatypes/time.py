@@ -25,6 +25,7 @@ class Time(Type):
         self._timedelta = 2208988800
 
     def encode(self):
+        # int(self._value + self._timedelta).to_bytes(4, order='big)
         encoded = pack('>I', self._value + self._timedelta)
         return encoded
 
