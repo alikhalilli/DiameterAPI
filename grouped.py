@@ -24,8 +24,8 @@ AVP_header_length = 12 bytes [4+1+3+4]
 
 
 class GroupedAVP:
-    def __init__(self, code, flags, ):
-        self._AVPs = []
+    def __init__(self, avps=[]):
+        self._AVPs = avps
 
     def __len__(self):
         length = 0
@@ -39,8 +39,11 @@ class GroupedAVP:
             encoded += avp.encode()
         return encoded
 
-    def decodeFromBuffer(self, buff):
+    @staticmethod
+    def decodeFromBuffer(buff):
+        avps = []
         while buff:
             a = AVP.decodeFromBuffer(buff)
             buff = buff[len(a):]
-            self._AVPs.append(a)
+            avps.append(a)
+        return GroupedAVP(avps)
