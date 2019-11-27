@@ -62,9 +62,9 @@ class Header:
         if len(buff) < Header.headerlength():
             raise ValueError(f"Corrupted data {buff}")
         return Header(
-            version=unpack('>B', buff[0])[0],
+            version=unpack('>B', buff[0:1])[0],
             msglength=int.from_bytes(buff[1:4], byteorder='big'),
-            cmdflags=unpack('>B', buff[4])[0],
+            cmdflags=unpack('>B', buff[4:5])[0],
             cmdcode=int.from_bytes(buff[5:8], byteorder='big'),
             appId=unpack('>I', buff[8:12])[0],
             hopByHopId=unpack('>I', buff[12:16])[0],

@@ -14,7 +14,6 @@ class Message:
 
     def addNewAVP(self, avp):
         self.avps.append(avp)
-        print(avp)
         self.header._msglength += len(avp)
 
     def encode(self):
