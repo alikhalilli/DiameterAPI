@@ -24,7 +24,7 @@ addressFamily = {
 
 
 def getNatureOfAdress(val):
-    return 'ipv4'
+    return 'IPv4'
 
 
 class AdressValueError(ValueError):
@@ -93,6 +93,3 @@ class Address(OctetString):
 
     def len(self):
         return self.__len__()
-
-    def getpadding(self):
-        super().getpadding(self)

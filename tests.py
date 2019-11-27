@@ -3,7 +3,11 @@ from datatypes.integer32 import Integer32
 from datatypes.octetstring import OctetString
 from datatypes.diamidentity import DiameterIdentity
 from message import Message
-
+from datatypes.group import Group
+from grouped import GroupedAVP
+from scap import SCAPDef
+from datatypes.address import Address
+from datatypes.unsigned32 import Unsigned32
 
 flags = dict(
     Request=1 << 7,
@@ -15,7 +19,26 @@ flags = dict(
     Protected=1 << 5)
 
 if __name__ == "__main__":
-
+    m = Message(cmdflags=flags['Request'],
+                cmdcode=257,
+                appId=0)
+    originHost = AVP(
+        code=264, flags=avpflags['mandatory'], data=DiameterIdentity('10.5.8.11'))
+    originRealm = AVP(
+        code=296, flags=avpflags['mandatory'], data=DiameterIdentity('azercell.com'))
+    host_IP_Address = AVP(
+        code=257, flags=avpflags['mandatory'], data=Address('10.5.8.11'))
+    vendorID = AVP(
+        code=266, flags=avpflags['mandatory'], vendorID=193, data=Unsigned32(193))
+    productName = AVP(code=269, flags=0b0, data=OctetString('CSDK'))
+    authAppId = AVP(code=258, flags=avpflags['mandatory'], data=Unsigned32(4))
+    avps = [originHost, originRealm, host_IP_Address,
+            vendorID, productName, authAppId]
+    for avp in avps:
+        m.addNewAVP(avp)
+    print(m.encode())
+    print(m)
+"""
     m = Message(
         cmdflags=flags['Request'],
         cmdcode=272,
@@ -35,7 +58,37 @@ if __name__ == "__main__":
         vendorID=None,
         data=OctetString("grump.example.com:33041;23432;893;0AF3B81")
     ))
-    print(m.encode())
+    m.addNewAVP(
+        AVP(
+            code=263,
+            flags=avpflags['mandatory'],
+            vendorID=None,
+            data=GroupedAVP(
+                [
+                    AVP(code=231,
+                        flags=avpflags['vendor'] | avpflags['mandatory'],
+                        vendorID=22,
+                        data=Integer32(12)),
+                    AVP(233,
+                        flags=avpflags['vendor'],
+                        vendorID=77,
+                        data=OctetString("Salam")),
+                    AVP(
+                        code=263,
+                        flags=avpflags['mandatory'],
+                        vendorID=None,
+                        data=OctetString(
+                            "grump.example.com:33041;23432;893;0AF3B81")
+                    )
+                ]
+            ))
+    )"""
+# print(m.decodeFromBytes(b'\x01\x00\x00\xcc\x80\x00\x01\x10\x00\x00\x00\x04\xae\x1c\x8a\xd7\x83W\x81\xad\x00\x00\x00\xe7\xc0\x00\x00\x10\x00\x00\x00\x16\x00\x00\x00\x0c\x00\x00\x00\xe9\x80\x00\x00\x11\x00\x00\x00MSalam\x00\x00\x00\x00\x00\x01\x07@\x00\x001grump.example.com:33041;23432;893;0AF3B81\x00\x00\x00\x00\x00\x01\x07@\x00\x00`\x00\x00\x00\xe7\xc0\x00\x00\x10\x00\x00\x00\x16\x00\x00\x00\x0c\x00\x00\x00\xe9\x80\x00\x00\x11\x00\x00\x00MSalam\x00\x00\x00\x00\x00\x01\x07@\x00\x001grump.example.com:33041;23432;893;0AF3B81\x00\x00\x00'))
+"""    buff = b'\x01\x00\x01\x10'
+    while buff:
+        print(buff)
+        buff = buff[1:]
+    print(m.encode())"""
 """    a = AVP(231,
             flags=avpflags['vendor'] | avpflags['mandatory'],
             vendor=22,

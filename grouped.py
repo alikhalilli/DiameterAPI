@@ -47,3 +47,6 @@ class GroupedAVP:
             buff = buff[len(a):]
             avps.append(a)
         return GroupedAVP(avps)
+
+    def getpadding(self):
+        return 0

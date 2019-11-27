@@ -95,6 +95,8 @@ class Header:
         return f"""
         Version: {self._version}
         Message Length: {self._msglength}
+        Header Length: {self.headerlength()}
+        Body Length: {self._msglength - self.headerlength()}
         Flags: {self._cmdflags}
         Command Code: {self._cmdcode}
         AppID: {self._appId}

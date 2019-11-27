@@ -14,12 +14,14 @@ class Message:
 
     def addNewAVP(self, avp):
         self.avps.append(avp)
+        print(avp)
         self.header._msglength += len(avp)
 
     def encode(self):
         encoded = bytearray()
         encoded += self.header.encode()
         for avp in self.avps:
+            print(f"encoding avp: {avp.code}")
             encoded += avp.encode()
         return encoded
 
@@ -37,6 +39,9 @@ class Message:
         decodedAVPs = [a for a in self.decodeBody(
             buff[self.header.headerlength():])]
         return (header, decodedAVPs)
+
+    def length(self):
+        return self.header.length
 
     def __repr__(self):
         return f"""

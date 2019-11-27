@@ -84,7 +84,8 @@ class AVP:
         # unpack('>I', b'\x00' + bytedata[5:8])
         a.length = int.from_bytes(buff[5:8], byteorder='big')
         a.vendorID = unpack('>I', buff[8:12])
-        a.data = (AVP.getType(a.code, a.vendorID)).decode(buff[12:a.length])
+        a.data = (AVP.getType(a.code, a.vendorID)
+                  ).decodeFromBuffer(buff[12:a.length])
         return a
 
     @staticmethod
@@ -113,7 +114,7 @@ class AVP:
         return self.__len__()
 
     def __len__(self):
-        return self._length + self._data.getpadding()
+        return self._length + self._padding
 
     def _hlen(self):
         if self._vendorID or (self._flags & avpflags['vendor']):
@@ -170,7 +171,8 @@ class AVP:
         AVP:
         Code: {self._code}
         Flags: {self._flags}
-        Length: {self._length}
+        LengthOnMsg: {self._length}
+        WholeLength: {self.__len__()}
         VendorID: {self._vendorID}
         Data: {self._data},
         Whole AVP Encoded: {self.encode()}
