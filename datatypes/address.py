@@ -77,16 +77,13 @@ class Address(OctetString):
 
         return encoded
 
-    def decode(self):
-        pass
-
     @staticmethod
-    def decodeFromBytes(self, buff):
+    def decodeFromBuffer(self, buff):
         self._addrType = buff[:2]
         if self._addrType == addressFamily['IPv4']['val']:
-            return socket.inet_ntop(socket.AF_INET, buff[2:])
+            return Address(socket.inet_ntop(socket.AF_INET, buff[2:]))
         elif self._addrType == addressFamily['IPv6']['val']:
-            return socket.inet_ntop(socket.AF_INET6, buff[2:])
+            return Address(socket.inet_ntop(socket.AF_INET6, buff[2:]))
 
     def __len__(self):
         return addressFamily[self._addrType]['len'] + 2

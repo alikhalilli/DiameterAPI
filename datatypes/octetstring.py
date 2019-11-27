@@ -1,7 +1,7 @@
 from struct import pack, unpack
 from binascii import hexlify, unhexlify
 from .datatype import Type
-from .calcpad import get_paddingc
+from .calcpad import new_calc_padding
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -45,11 +45,11 @@ class OctetString(Type):
         return len(self._value)
 
     def getpadding(self):
-        return get_paddingc(self.len()) - self.len()
+        return new_calc_padding(self.len()) - self.len()
 
     @staticmethod
-    def decodeFromBytes(buff):
-        return unpack(f'>{len(buff)}s', buff)
+    def decodeFromBuffer(buff):
+        return OctetString(unpack(f'>{len(buff)}s', buff)[0])
 
 
 """    @staticmethod

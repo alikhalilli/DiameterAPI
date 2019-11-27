@@ -6,14 +6,12 @@ class IpAddressV4(Type):
     def __init__(self, value):
         self._value = value
 
-    def decodeFromBytes(self, buff):
-        return socket.inet_ntop(socket.AF_INET, buff)
+    @staticmethod
+    def decodeFromBuffer(buff):
+        return IpAddressV4(socket.inet_ntop(socket.AF_INET, buff))
 
     def encode(self):
         return socket.inet_pton(socket.AF_INET, self._value)
-
-    def decode(self):
-        pass
 
     def getpadding(self):
         return 0

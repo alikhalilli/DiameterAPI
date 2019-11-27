@@ -1,7 +1,5 @@
-import struct
-from binascii import hexlify, unhexlify
+from struct import pack, unpack
 from .datatype import Type
-
 
 """
   0                   1                   2                   3
@@ -28,28 +26,20 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 
 class Float64(Type):
 
-    def __init__(self, val, vFlag=False):
-        self._val = val
-        self._vFlag = vFlag
-
-    def decode(self):
-        # Float64 => 8 bytes
-        # d - double
-        return struct.unpack('>d', unhexlify(self._val))
+    def __init__(self, value):
+        super().__init__(value)
 
     def encode(self):
-        # Float32 => 8 bytes
-        # d - double
-        return hexlify(struct.pack('>d', self._val.encode('utf-8'))).decode('utf-8')
-
-    def getAVPLen(self):
-        # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Float64)
-        # 4 + 1 + 3 + [4] + 4 = 12 + [8]
-        return 16 if self._vFlag else 20
+        # Float64 => 8 bytes
+        return pack('>d', self._value)
 
     @staticmethod
-    def getTypeLen():
-        return 8
+    def decodeFromBuffer(buff):
+        # Float64 => 8 bytes
+        return unpack('>f', buff)[0]
 
-    def getPaddingC(self):
-        return 0
+    def __len__(self):
+        return 4
+
+    def len(self):
+        return self.__len__()

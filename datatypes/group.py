@@ -42,11 +42,11 @@ class Group(Type):
     def len(self):
         return self.__len__()
 
-    def decodeFromBytes(self, buff):
-        return buff
-
     def encode(self):
         return self._value
+
+    def decodeFromBuffer(self, buff):
+        return buff
 
     def getpadding(self):
         return 0

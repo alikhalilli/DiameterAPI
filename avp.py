@@ -97,7 +97,7 @@ class AVP:
 
     @staticmethod
     def getType(avpcode, vendorID):
-        return types["Integer"]
+        return types["Integer32"]
 
     @staticmethod
     def encodeFromAVP(avp):

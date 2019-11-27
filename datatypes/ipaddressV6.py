@@ -6,8 +6,9 @@ class IpAddressV6(Type):
     def __init__(self, value):
         self._value = value
 
-    def decodeFromBytes(self, buff):
-        return socket.inet_ntop(socket.AF_INET6, buff)
+    @staticmethod
+    def decodeFromBuffer(buff):
+        return IpAddressV6(socket.inet_ntop(socket.AF_INET6, buff))
 
     def encode(self):
         return socket.inet_pton(socket.AF_INET6, self._value)

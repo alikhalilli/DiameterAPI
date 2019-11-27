@@ -8,10 +8,6 @@ class AbstractType(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def decode(self):
-        raise NotImplementedError
-
-    @abstractmethod
     def len(self):
         raise NotImplementedError
 
@@ -21,7 +17,7 @@ class AbstractType(ABC):
 
     @staticmethod
     @abstractmethod
-    def decodeFromBytes(self, buff):
+    def decodeFromBuffer(self, buff):
         raise NotImplementedError
 
 

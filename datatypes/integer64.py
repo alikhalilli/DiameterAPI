@@ -1,6 +1,6 @@
-import struct
+from struct import pack, unpack
 from binascii import hexlify, unhexlify
-
+from datatype import Type
 
 """
   0                   1                   2                   3
@@ -25,30 +25,27 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class Integer64:
-    @staticmethod
-    def decode(val):
+class Integer64(Type):
+
+    def __init__(self, value):
+        super().__init__(value)
+
+    def decode(self, val):
         # Integer64 => 8 bytes
         # Q => unsigned long long
-        return struct.unpack('>Q', unhexlify(val))
+        return unpack('>Q', unhexlify(self._value))
 
     @staticmethod
-    def encode(val):
+    def decodeFromBuffer(buff):
+        return Integer64(unpack('>Q', buff)[0])
+
+    def encode(self):
         # Integer64 => 8 bytes
         # Q => unsigned long long
-        return hexlify(struct.pack('>Q', val.encode('utf-8'))).decode('utf-8')
+        return pack('>Q', self._value)
 
-    @staticmethod
-    def getAVPLen(vFlag=False):
-        # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
-        # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Int32)
-        # 4 + 1 + 3 + [4] + 8 = 16 + [4]
-        return 16 if vFlag else 20
+    def len(self):
+        return self.__len__()
 
-    @staticmethod
-    def getTypeLen():
+    def __len__(self):
         return 8
-
-    @staticmethod
-    def getPaddingC():
-        return 0

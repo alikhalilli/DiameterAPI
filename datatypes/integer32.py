@@ -47,17 +47,6 @@ class Integer32(Type):
         return 0
 
     @staticmethod
-    def decodeFromBytes(buf):
+    def decodeFromBuffer(buff):
         # return unpack('>I', buf)
-        return int.from_bytes(buf, byteorder='big')
-
-
-print(Integer32(32444).encode())
-print(Integer32.decodeFromBytes(b'\x00\x00~\xbc'))
-print(len(b'\x00\x00~\xbc'))
-""" @staticmethod
-    def getAVPLen(vFlag=False):
-        # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
-        # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Int32)
-        # 4 + 1 + 3 + [4] + 4 = 12 + [4]
-        return 12 if vFlag else 16"""
+        return int.from_bytes(buff, byteorder='big')

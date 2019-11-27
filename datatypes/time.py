@@ -26,21 +26,20 @@ class Time(Type):
 
     def encode(self):
         # int(self._value + self._timedelta).to_bytes(4, order='big)
-        encoded = pack('>I', self._value + self._timedelta)
-        return encoded
-
-    def len(self):
-        return self.__len__()
+        return pack('>I', self._value + self._timedelta)
 
     def decode(self):
         pass
 
-    def decodeFromBytes(self, buff):
-        decoded = unpack('>I', unhexlify(buff))[0]
-        return decoded - self._timedelta
+    @staticmethod
+    def decodeFromBuffer(self, buff):
+        return Time(unpack('>I', buff)[0] - self._timedelta)
 
     def getpadding(self):
         return 0
+
+    def len(self):
+        return self.__len__()
 
     def __len__(self):
         return 4
