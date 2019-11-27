@@ -8,6 +8,7 @@ from grouped import GroupedAVP
 from scap import SCAPDef
 from datatypes.address import Address
 from datatypes.unsigned32 import Unsigned32
+import socket
 
 flags = dict(
     Request=1 << 7,
@@ -38,6 +39,21 @@ if __name__ == "__main__":
         m.addNewAVP(avp)
     print(m.encode())
     print(m)
+
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = ''
+    port = ''
+    client_sock.connect((host, port))
+    count = 0
+    while True:
+        data = input("input:")
+        client_sock.sendall(m.encode())
+        from_server = client_sock.recv(1024)
+        if from_server != b'':
+            print(f"from server: {from_server}")
+        else:
+            client_sock.close()
+
 """
     m = Message(
         cmdflags=flags['Request'],
