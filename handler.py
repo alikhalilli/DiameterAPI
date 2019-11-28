@@ -2,6 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from message import Message
 from Errors import CommandNotFoundException
+import utils
 
 
 class Handler(ABC):
@@ -91,8 +92,8 @@ class CCAHandler(AbstractHandler):
 
 
 class DWRHandler(AbstractHandler):
-    def handle(self, request):
-        pass
+    def handle(self, request, conn):
+        conn.sendall(utils.makeDWA())
 
 
 class DWAHandler(AbstractHandler):

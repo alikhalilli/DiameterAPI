@@ -11,6 +11,8 @@ from datatypes.address import Address
 from datatypes.unsigned32 import Unsigned32
 import socket
 from abc import ABC, abstractmethod
+import utils
+import handler
 
 flags = dict(
     Request=1 << 7,
@@ -22,52 +24,9 @@ flags = dict(
     Protected=1 << 5)
 
 
-class Handler(ABC):
-    @abstractmethod
-    def handle(self, request):
-        pass
-
-
-class CERHandler(Handler):
-
-    def makeCEA(self):
-        pass
-
-    def handle(self, request):
-        pass
-
-
-class CEAHandler(Handler):
-    def handle(self, request):
-        m = Message.decodeFromBytes(buff=request)
-        print(m)
-
-
-class DWRHandler(Handler):
-    def handle(self, request):
-        m = Message.decodeFromBytes(buff=request)
-
-
 if __name__ == "__main__":
-    m = Message(cmdflags=flags['Request'],
-                cmdcode=257,
-                appId=0)
-    originHost = AVP(
-        code=264, flags=avpflags['mandatory'], data=DiameterIdentity('10.5.8.11'))
-    originRealm = AVP(
-        code=296, flags=avpflags['mandatory'], data=DiameterIdentity('azercell.com'))
-    host_IP_Address = AVP(
-        code=257, flags=avpflags['mandatory'], data=Address('10.5.8.11'))
-    vendorID = AVP(
-        code=266, flags=avpflags['mandatory'], vendorID=193, data=Unsigned32(193))
-    productName = AVP(code=269, flags=0b0, data=OctetString('CSDK'))
-    authAppId = AVP(code=258, flags=avpflags['mandatory'], data=Unsigned32(4))
-    avps = [originHost, originRealm, host_IP_Address,
-            vendorID, productName, authAppId]
-    for avp in avps:
-        m.addNewAVP(avp)
-    print(m.encode())
-    print(m)
+
+    cer = utils.makeCER()
 
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = '10.1.0.12'
@@ -75,13 +34,14 @@ if __name__ == "__main__":
     client_sock.connect((host, port))
     count = 0
 
-    cea_handler = CEAHandler()
+    hdr_handler = handler.HeaderHandler()
+
     while True:
         data = input("input:")
-        client_sock.sendall(m.encode())
+        client_sock.sendall(cer)
         from_server = client_sock.recv(1024)
         if from_server != b'':
-            cea_handler.handle(from_server)
+            hdr_handler.handle(from_server)
         else:
             client_sock.close()
 
