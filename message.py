@@ -37,8 +37,8 @@ class Message:
             yield a
 
     @staticmethod
-    def decodeFromBytes(self, buff):
-        header = Message.decodeHeader(buff[:self.header.headerlength()])
+    def decodeFromBytes(buff):
+        header = Message.decodeHeader(buff[:20])
         decodedAVPs = [a for a in Message.decodeBody(buff[20:])]
         return Message(header.cmdflags, header.cmdcode, header.appId, decodedAVPs)
 

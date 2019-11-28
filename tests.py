@@ -39,10 +39,13 @@ class CERHandler(Handler):
 
 class CEAHandler(Handler):
     def handle(self, request):
-        m = Message(cmdflags=0b0,
-                    cmdcode=257,
-                    appId=0)
-        m.decodeFromBytes(buff=request)
+        m = Message.decodeFromBytes(buff=request)
+        print(m)
+
+
+class DWRHandler(Handler):
+    def handle(self, request):
+        m = Message.decodeFromBytes(buff=request)
 
 
 if __name__ == "__main__":
@@ -71,12 +74,14 @@ if __name__ == "__main__":
     port = 3868
     client_sock.connect((host, port))
     count = 0
+
+    cea_handler = CEAHandler()
     while True:
         data = input("input:")
         client_sock.sendall(m.encode())
         from_server = client_sock.recv(1024)
         if from_server != b'':
-            print(f"from server: {from_server}")
+            cea_handler.handle(from_server)
         else:
             client_sock.close()
 
