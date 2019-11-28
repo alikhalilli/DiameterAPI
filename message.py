@@ -1,5 +1,6 @@
 from diameterheader import Header
 from avp import AVP
+import random
 
 
 class Message:
@@ -7,10 +8,14 @@ class Message:
                  cmdflags,
                  cmdcode,
                  appId,
+                 hopByHopId=random.getrandbits(32),
+                 endToEndId=random.getrandbits(32),
                  avps=[]):
         self.header = Header(cmdflags=cmdflags,
                              cmdcode=cmdcode,
-                             appId=appId)
+                             appId=appId,
+                             hopByHopId=hopByHopId,
+                             endToEndId=endToEndId)
         self.avps = avps
         #self._encoded = None
 
@@ -42,7 +47,12 @@ class Message:
     def decodeFromBytes(buff):
         header = Message.decodeHeader(buff[:20])
         decodedAVPs = [a for a in Message.decodeBody(buff[20:])]
-        return Message(header.cmdflags, header.cmdcode, header.appId, decodedAVPs)
+        return Message(cmdflags=header.cmdflags,
+                       cmdcode=header.cmdcode,
+                       appId=header.appId,
+                       hopByHopId=header.hopByHopId,
+                       endToEndId=header.endToEndId,
+                       avps=decodedAVPs)
 
     def length(self):
         return self.header.length

@@ -73,6 +73,14 @@ class Header:
         )
 
     @property
+    def hopByHopId(self):
+        return self._hopByhopId
+
+    @property
+    def endToEndId(self):
+        return self._endToEndId
+
+    @property
     def cmdflags(self):
         return self._cmdflags
 

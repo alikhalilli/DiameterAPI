@@ -145,4 +145,34 @@ def makeCCR():
             AVP(code=417, flags=0x40, data=Unsigned32(1))
         ]
     ))
+
+    avps = [sessionID, serviceContextID, authAppId, originHost, originRealm,
+            ccRequestNumber, serviceIdentifier, destinationRealm, eventTimestamp,
+            subscriptionID, otherPartyId, msTimeZone, ccRequestType, ccRequestedServiceUnit]
+    for avp in avps:
+        m.addNewAVP(avp)
+    return m.encode()
+
+
+def makeCCA():
+    m = Message(cmdflags=0b0, cmdcode=272, appId=0)
+    sessionID = AVP(code=263, flags=0x40, data=UTF8String(
+        'delishka;hlapi;1611836847258625'))
+    resultCode = AVP(code=268, flags=0x40, data=Unsigned32(2001))
+    authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity('10.5.8.11'))
+    originRealm = AVP(code=296, flags=0x40,
+                      data=DiameterIdentity('azercell.com'))
+    ccRequestNumber = AVP(code=415, flags=0x40, data=Unsigned32(0))
+    ccRequestType = AVP(code=416, flags=0x40, data=Enumerated(1))
+    ccGrantedServiceUnit = AVP(code=431, flags=0x40, data=GroupedAVP(
+        [
+            AVP(code=417, flags=0x40, data=Unsigned32(1))
+        ]
+    ))
+    validityTime = AVP(code=448, flags=0x40, data=Unsigned32(120))
+    avps = [sessionID, resultCode, authAppId, originHost, originRealm,
+            ccRequestNumber, ccRequestType, ccGrantedServiceUnit, validityTime]
+    for avp in avps:
+        m.addNewAVP(avp)
     return m.encode()
