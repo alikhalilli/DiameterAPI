@@ -74,7 +74,6 @@ class Address(OctetString):
             encoded[2:6] = socket.inet_pton(socket.AF_INET, self._value)
         elif self._addrType == 'IPv6':
             encoded[2:18] = socket.inet_pton(socket.AF_INET6, self._value)
-
         return encoded
 
     @staticmethod
@@ -90,3 +89,6 @@ class Address(OctetString):
 
     def len(self):
         return self.__len__()
+
+    def __repr__(self):
+        return str(self._value)

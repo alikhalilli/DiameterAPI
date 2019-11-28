@@ -6,11 +6,12 @@ class Message:
     def __init__(self,
                  cmdflags,
                  cmdcode,
-                 appId):
+                 appId,
+                 avps=[]):
         self.header = Header(cmdflags=cmdflags,
                              cmdcode=cmdcode,
                              appId=appId)
-        self.avps = []
+        self.avps = avps
 
     def addNewAVP(self, avp):
         self.avps.append(avp)
@@ -24,20 +25,22 @@ class Message:
             encoded += avp.encode()
         return encoded
 
-    def decodeHeader(self, buff):
+    @staticmethod
+    def decodeHeader(buff):
         return Header.decode(buff)
 
-    def decodeBody(self, buff):
+    @staticmethod
+    def decodeBody(buff):
         while buff:
             a = AVP.decodeFromBuffer(buff)
             buff = buff[len(a):]
             yield a
 
+    @staticmethod
     def decodeFromBytes(self, buff):
-        header = self.decodeHeader(buff[:self.header.headerlength()])
-        decodedAVPs = [a for a in self.decodeBody(
-            buff[self.header.headerlength():])]
-        return (header, decodedAVPs)
+        header = Message.decodeHeader(buff[:self.header.headerlength()])
+        decodedAVPs = [a for a in Message.decodeBody(buff[20:])]
+        return Message(header.cmdflags, header.cmdcode, header.appId, decodedAVPs)
 
     def length(self):
         return self.header.length

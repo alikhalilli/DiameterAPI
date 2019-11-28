@@ -1,4 +1,4 @@
-from avp import AVP
+import avp
 
 """
   0                   1                   2                   3
@@ -43,7 +43,7 @@ class GroupedAVP:
     def decodeFromBuffer(buff):
         avps = []
         while buff:
-            a = AVP.decodeFromBuffer(buff)
+            a = avp.AVP.decodeFromBuffer(buff)
             buff = buff[len(a):]
             avps.append(a)
         return GroupedAVP(avps)

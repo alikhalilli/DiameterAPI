@@ -73,27 +73,28 @@ class AVP:
         # unpack('>I', b'\x00' + bytedata[5:8])
         self._length = int.from_bytes(buff[5:8], byteorder='big')  # 5 6 7
         if self._flags & avpflags['vendor']:
-            self._vendor = unpack('>I', buff[8:12])  # 8 9 10 11
-        self._data = (AVP.getType(self._code, self._vendor)).decode(buff[12:])
+            self._vendorID = unpack('>I', buff[8:12])  # 8 9 10 11
+        self._data = (AVP.getType(self._code, self._vendorID)
+                      ).decodeFromBuffer(buff[12:])
         return self
 
     @staticmethod
     def decodeFromBuffer(buff):
-        acode = unpack('>I', buff[0:4])[0]
-        aflags = unpack('>B', buff[4:5])[0]
-        alength = int.from_bytes(buff[5:8], byteorder='big')
-        avendorID = None
+        a_code = unpack('>I', buff[0:4])[0]
+        a_flags = unpack('>B', buff[4:5])[0]
+        a_length = int.from_bytes(buff[5:8], byteorder='big')
+        a_vendorID = None
         a_hdrlen = 8
-        if aflags & avpflags['vendor']:
-            avendorID = unpack('>I', buff[8:12])[0]
+        if a_flags & avpflags['vendor']:
+            a_vendorID = unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
-        adatatype = AVP.getType(acode, avendorID)
-        adata = adatatype.decodeFromBuffer(buff[a_hdrlen:alength])
+        a_data = types[AVP.getType(a_code, a_vendorID)].decodeFromBuffer(
+            buff[a_hdrlen:a_length])
         return AVP(
-            code=acode,
-            flags=aflags,
-            vendorID=avendorID,
-            data=adata
+            code=a_code,
+            flags=a_flags,
+            vendorID=a_vendorID,
+            data=a_data
         )
 
     @staticmethod
@@ -183,5 +184,5 @@ class AVP:
         WholeLength: {self.__len__()}
         VendorID: {self._vendorID}
         Data: {self._data},
-        Whole AVP Encoded: {self.encode()}
+        Whole AVP Encoded: {self._encoded}
         --------------------------------------"""

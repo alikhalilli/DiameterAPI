@@ -72,8 +72,20 @@ class Header:
         )
 
     @property
+    def cmdflags(self):
+        return self._cmdflags
+
+    @property
+    def cmdcode(self):
+        return self._cmdcode
+
+    @property
     def version(self):
         return self._version
+
+    @property
+    def appId(self):
+        return self._appId
 
     @version.setter
     def version(self, val):

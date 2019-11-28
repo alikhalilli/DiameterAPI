@@ -1,4 +1,7 @@
 from .datatype import Type
+from grouped import GroupedAVP
+
+
 """
  The Diameter protocol allows AVP values of type 'Grouped.'  This
    implies that the Data field is actually a sequence of AVPs.  It is

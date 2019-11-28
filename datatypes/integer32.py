@@ -49,4 +49,4 @@ class Integer32(Type):
     @staticmethod
     def decodeFromBuffer(buff):
         # return unpack('>I', buf)
-        return int.from_bytes(buff, byteorder='big')
+        return Integer32(int.from_bytes(buff, byteorder='big'))

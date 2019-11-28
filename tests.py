@@ -2,6 +2,7 @@ from avp import AVP, avpflags
 from datatypes.integer32 import Integer32
 from datatypes.octetstring import OctetString
 from datatypes.diamidentity import DiameterIdentity
+from datatypes.group import Group
 from message import Message
 from datatypes.group import Group
 from grouped import GroupedAVP
@@ -28,8 +29,20 @@ class Handler(ABC):
 
 
 class CERHandler(Handler):
+
+    def makeCEA(self):
+        pass
+
     def handle(self, request):
         pass
+
+
+class CEAHandler(Handler):
+    def handle(self, request):
+        m = Message(cmdflags=0b0,
+                    cmdcode=257,
+                    appId=0)
+        m.decodeFromBytes(buff=request)
 
 
 if __name__ == "__main__":

@@ -36,7 +36,7 @@ class Float64(Type):
     @staticmethod
     def decodeFromBuffer(buff):
         # Float64 => 8 bytes
-        return unpack('>f', buff)[0]
+        return Float64(unpack('>f', buff)[0])
 
     def __len__(self):
         return 4

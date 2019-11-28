@@ -30,8 +30,8 @@ class AVPTools:
 
     @staticmethod
     def getTypeByCode(code):
-        for k, v in avpDict.items():
-            if v['code'] == code:
+        for _, v in avpDict.items():
+            if v['code'] == str(code):
                 return v['typename']
 
     @staticmethod
