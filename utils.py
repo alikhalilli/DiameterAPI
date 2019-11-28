@@ -26,7 +26,7 @@ types = {
     "Float64": Float64,
     "Grouped": Group,
     "IPFilterRule": IPFilterRule,
-    "IPv4": IpAddressV4,
+    "IPAddress": IpAddressV4,
     "Integer32": Integer32,
     "Integer64": Integer64,
     "OctetString": OctetString,
@@ -35,6 +35,8 @@ types = {
     "UTF8String": UTF8String,
     "Unsigned32": Unsigned32,
     "Unsigned64": Unsigned64,
+    "AppId": Unsigned32,
+    "VendorId": Unsigned32
 }
 
 

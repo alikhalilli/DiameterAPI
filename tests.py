@@ -54,8 +54,8 @@ if __name__ == "__main__":
     print(m)
 
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = ''
-    port = ''
+    host = '10.1.0.12'
+    port = 3868
     client_sock.connect((host, port))
     count = 0
     while True:

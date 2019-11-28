@@ -79,16 +79,16 @@ class AVP:
 
     @staticmethod
     def decodeFromBuffer(buff):
-        acode = unpack('>I', buff[:4])[0]
-        aflags = unpack('>B', buff[4])[0]
-        alength = int.from_bytes(buff[5:8], byteorder='big')[0]
+        acode = unpack('>I', buff[0:4])[0]
+        aflags = unpack('>B', buff[4:5])[0]
+        alength = int.from_bytes(buff[5:8], byteorder='big')
         avendorID = None
         a_hdrlen = 8
         if aflags & avpflags['vendor']:
             avendorID = unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
-        adata = (AVP.getType(acode, avendorID)).decodeFromBuffer(
-            buff[a_hdrlen:alength])
+        adatatype = AVP.getType(acode, avendorID)
+        adata = adatatype.decodeFromBuffer(buff[a_hdrlen:alength])
         return AVP(
             code=acode,
             flags=aflags,
