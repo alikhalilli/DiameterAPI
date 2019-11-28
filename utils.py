@@ -1,4 +1,12 @@
 from datatypes.enumerated import Enumerated
+from datatypes.time import Time
+from datatypes.utf8string import UTF8String
+from datatypes.ipfilterrule import IPFilterRule
+from datatypes.ipaddressV4 import IpAddressV4
+from datatypes.ipaddressV6 import IpAddressV6
+from datatypes.unsigned32 import Unsigned32
+from datatypes.unsigned64 import Unsigned64
+from datatypes.diameteruri import DiameterURI
 from datatypes.group import Group
 from datatypes.integer32 import Integer32
 from datatypes.integer64 import Integer64
@@ -12,21 +20,21 @@ from datatypes.datatype import Type
 types = {
     "Address": Address,
     "DiameterIdentity": DiameterIdentity,
-    "DiameterURI": None,
+    "DiameterURI": DiameterURI,
     "Enumerated": Enumerated,
     "Float32": Float32,
     "Float64": Float64,
     "Grouped": Group,
-    "IPFilterRule": None,
-    "IPv4": None,
+    "IPFilterRule": IPFilterRule,
+    "IPv4": IpAddressV4,
     "Integer32": Integer32,
     "Integer64": Integer64,
     "OctetString": OctetString,
     "QoSFilterRule": None,
-    "Time": None,
-    "UTF8String": None,
-    "Unsigned32": None,
-    "Unsigned64": None,
+    "Time": Time,
+    "UTF8String": UTF8String,
+    "Unsigned32": Unsigned32,
+    "Unsigned64": Unsigned64,
 }
 
 

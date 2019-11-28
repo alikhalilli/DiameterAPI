@@ -9,6 +9,7 @@ from scap import SCAPDef
 from datatypes.address import Address
 from datatypes.unsigned32 import Unsigned32
 import socket
+from abc import ABC, abstractmethod
 
 flags = dict(
     Request=1 << 7,
@@ -18,6 +19,18 @@ flags = dict(
     VendorSpecific=1 << 7,
     Mandatory=1 << 6,
     Protected=1 << 5)
+
+
+class Handler(ABC):
+    @abstractmethod
+    def handle(self, request):
+        pass
+
+
+class CERHandler(Handler):
+    def handle(self, request):
+        pass
+
 
 if __name__ == "__main__":
     m = Message(cmdflags=flags['Request'],

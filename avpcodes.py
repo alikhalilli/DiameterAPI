@@ -707,5 +707,3 @@ codes = dict(ADCRuleBaseName=1095,
              VolumeQuotaThreshold=869,
              XRES=1448,
              ePDGAddress=3425)
-
-print(codes)
