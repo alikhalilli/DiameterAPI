@@ -11,6 +11,20 @@ class AVPTools:
     'vendorid': '',
     'typename': 'OctetString'
     """
+
+    @staticmethod
+    def getCMDCodeByName(name):
+        try:
+            return commandDict[name]['code']
+        except KeyError:
+            print('AVP Not Found')
+
+    @staticmethod
+    def getCMDNameByCode(code):
+        for k, v in commandDict.items():
+            if v == str(code):
+                return k
+
     @staticmethod
     def getAllDetailsByName(name):
         return avpDict[name]

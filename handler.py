@@ -1,5 +1,7 @@
 import asyncio
 from abc import ABC, abstractmethod
+from message import Message
+from Errors import CommandNotFoundException
 
 
 class Handler(ABC):
@@ -23,6 +25,31 @@ class AbstractHandler(Handler):
         if self._next_handler:
             self._next_handler.handle(request)
         return None
+
+
+class HeaderHandler(AbstractHandler):
+    def handle(self, request):
+        cerhndlr = CERHandler()
+        ccrhndlr = CCRHandler()
+        dwrhndlr = DWRHandler()
+        Header = Message.decodeHeader(request[:20])
+        cmdCode = Header.cmdcode
+        cmdType = Header.cmdflags
+        if cmdCode == 253:
+            self.next_handler(cerhndlr)
+        elif cmdCode == 254:
+            self.next_handler(ccrhndlr)
+        elif cmdCode == 255:
+            self.next_handler(dwrhndlr)
+        else:
+            raise CommandNotFoundException(msg="Command Not Found")
+
+        if self._next_handler:
+            self._next_handler.handle(request)
+
+
+def CCAHandler():
+    pass
 
 
 class CERHandler(AbstractHandler):

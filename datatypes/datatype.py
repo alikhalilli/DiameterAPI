@@ -24,6 +24,7 @@ class AbstractType(ABC):
 class Type(AbstractType):
     def __init__(self, value):
         self._value = value
+        self._encoded = None
 
     @property
     def value(self):
@@ -41,4 +42,4 @@ class Type(AbstractType):
         Value: {self._value}
         Length: {self.len()}
         Padding: {self.getpadding()}
-        Encoded: {self.encode()}"""
+        Encoded: {self._encoded}"""

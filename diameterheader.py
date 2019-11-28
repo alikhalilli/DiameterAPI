@@ -1,6 +1,7 @@
 from struct import pack, unpack
 from binascii import hexlify, unhexlify
 import random
+from AVPRepo import AVPTools
 
 """
  0                   1                   2                   3
@@ -110,7 +111,7 @@ class Header:
         Header Length: {self.headerlength()}
         Body Length: {self._msglength - self.headerlength()}
         Flags: {self._cmdflags}
-        Command Code: {self._cmdcode}
+        Command Code: {self._cmdcode}, {AVPTools.getCMDNameByCode(self._cmdcode)}
         AppID: {self._appId}
         HopByHopId: {self._hopByhopId}
         EndToEndId: {self._endToEndId}
