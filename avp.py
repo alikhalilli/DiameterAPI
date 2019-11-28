@@ -10,6 +10,7 @@ from datatypes.diamidentity import DiameterIdentity
 from datatypes.address import Address
 from datatypes.datatype import Type
 from utils import types
+from AVPRepo import AVPTools
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -96,8 +97,8 @@ class AVP:
         )
 
     @staticmethod
-    def getType(avpcode, vendorID):
-        return types["Integer32"]
+    def getType(avpcode, vendorID=None):
+        return AVPTools.getTypeByCode(avpcode)
 
     @staticmethod
     def encodeFromAVP(avp):
