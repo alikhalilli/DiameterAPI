@@ -12,6 +12,7 @@ class Message:
                              cmdcode=cmdcode,
                              appId=appId)
         self.avps = avps
+        #self._encoded = None
 
     def addNewAVP(self, avp):
         self.avps.append(avp)
@@ -23,6 +24,7 @@ class Message:
         for avp in self.avps:
             print(f"encoding avp: {avp.code}")
             encoded += avp.encode()
+        #self._encoded = encoded
         return encoded
 
     @staticmethod
