@@ -1,5 +1,4 @@
 from diameterheader import Header
-from avp import AVP
 import random
 
 
@@ -38,6 +37,7 @@ class Message:
 
     @staticmethod
     def decodeBody(buff):
+        from avp import AVP
         while buff:
             a = AVP.decodeFromBuffer(buff)
             buff = buff[len(a):]

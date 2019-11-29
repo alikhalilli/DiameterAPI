@@ -1,4 +1,3 @@
-from avp import AVP, avpflags
 from datatypes.integer32 import Integer32
 from datatypes.octetstring import OctetString
 from datatypes.diamidentity import DiameterIdentity
@@ -25,6 +24,7 @@ flags = dict(
 
 
 if __name__ == "__main__":
+    from avp import AVP, avpflags
 
     cer = utils.makeCER()
 

@@ -46,21 +46,21 @@ class HeaderHandler(AbstractHandler):
         cmdCode = Header.cmdcode
         cmdType = Header.cmdflags
         handler = None
-        if cmdCode == 257 & cmdType:
+        if (cmdCode == 257) & (cmdType != 0b0):
             handler = self.cerhndlr
-        elif cmdCode == 257 & (not cmdType):
+        elif (cmdCode == 257) & (cmdType == 0b0):
             handler = self.ceahndlr
-        elif cmdCode == 272 & cmdType:
+        elif (cmdCode == 272) & (cmdType != 0b0):
             handler = self.ccrhndlr
-        elif cmdCode == 272 & (not cmdType):
+        elif (cmdCode == 272) & (cmdType == 0b0):
             handler = self.ccahndlr
-        elif cmdCode == 280 & cmdType:
+        elif (cmdCode == 280) & (cmdType != 0b0):
             handler = self.dwrhndlr
-        elif cmdCode == 280 & (not cmdType):
+        elif (cmdCode == 280) & (cmdType == 0b0):
             handler = self.dwahndlr
-        elif cmdCode == 282 & cmdType:
+        elif (cmdCode == 282) & (cmdType != 0b0):
             handler = self.dprhndlr
-        elif cmdCode == 283 & (not cmdType):
+        elif (cmdCode == 283) & (cmdType == 0b0):
             handler = self.dpahndlr
         else:
             raise CommandNotFoundException(msg="Command Not Found")

@@ -28,7 +28,7 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 class OctetString(Type):
 
     def __init__(self, value):
-        super().__init__(str(value))
+        super().__init__(value)
 
     def encode(self):
         # Size is dynamic

@@ -1942,7 +1942,8 @@ avpDict = {
     'mayencrypt': 'no',
     'protected': 'mustnot',
     'vendorbit': 'mustnot',
-    'vendorid': ''
+    'vendorid': '',
+    'typename': 'Grouped'
   },
   'Redirect-Host-Usage': {
     'code': '261',

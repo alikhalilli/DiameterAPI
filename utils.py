@@ -17,7 +17,6 @@ from datatypes.octetstring import OctetString
 from datatypes.diamidentity import DiameterIdentity
 from datatypes.address import Address
 from datatypes.datatype import Type
-from avp import AVP, avpflags
 from message import Message
 import time
 
@@ -37,9 +36,9 @@ types = {
     "Enumerated": Enumerated,
     "Float32": Float32,
     "Float64": Float64,
-    "Grouped": Group,
+    "Grouped": GroupedAVP,
     "IPFilterRule": IPFilterRule,
-    "IPAddress": IpAddressV4,
+    "IPAddress": Address,
     "Integer32": Integer32,
     "Integer64": Integer64,
     "OctetString": OctetString,
@@ -58,6 +57,7 @@ def findType(avpcode=None, avpname=None, vendorid=None):
 
 
 def makeCER():
+    from avp import AVP, avpflags
     m = Message(cmdflags=flags['Request'], cmdcode=257, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity('10.5.8.11'))
     originRealm = AVP(
@@ -74,6 +74,7 @@ def makeCER():
 
 
 def makeCEA():
+    from avp import AVP, avpflags
     m = Message(cmdflags=0b0, cmdcode=257, appId=0)
     resultCode = AVP(code=268, flags=0x40, data=Unsigned32(2001))
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity('10.5.8.11'))
@@ -91,6 +92,7 @@ def makeCEA():
 
 
 def makeDWR():
+    from avp import AVP, avpflags
     m = Message(cmdflags=0b0, cmdcode=280, appId=0)
     originHost = AVP(
         code=264, flags=0x40, data=DiameterIdentity('10.5.8.11'))
@@ -103,6 +105,7 @@ def makeDWR():
 
 
 def makeDWA():
+    from avp import AVP, avpflags
     m = Message(cmdflags=0b0, cmdcode=280, appId=0)
     resultCode = AVP(code=268, flags=0x40, data=Unsigned32(2001))
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity('10.5.8.11'))
@@ -115,6 +118,7 @@ def makeDWA():
 
 
 def makeCCR():
+    from avp import AVP, avpflags
     m = Message(cmdflags=0b0, cmdcode=272, appId=0)
     sessionID = AVP(code=263, flags=0x40, data=UTF8String(
         'delishka;hlapi;1611836847258625'))
@@ -155,6 +159,7 @@ def makeCCR():
 
 
 def makeCCA():
+    from avp import AVP, avpflags
     m = Message(cmdflags=0b0, cmdcode=272, appId=0)
     sessionID = AVP(code=263, flags=0x40, data=UTF8String(
         'delishka;hlapi;1611836847258625'))

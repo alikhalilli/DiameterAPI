@@ -22,7 +22,7 @@ class AVPTools:
     @staticmethod
     def getCMDNameByCode(code):
         for k, v in commandDict.items():
-            if v == str(code):
+            if v['code'] == str(code):
                 return k
 
     @staticmethod
