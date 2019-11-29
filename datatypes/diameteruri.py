@@ -1,5 +1,5 @@
-from .octetstring import OctetString
+import octetstring
 
 
-class DiameterURI(OctetString):
+class DiameterURI(octetstring.OctetString):
     pass

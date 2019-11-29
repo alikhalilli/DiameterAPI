@@ -1,5 +1,5 @@
-from .integer64 import Integer64
+import integer64
 
 
-class Unsigned64(Integer64):
+class Unsigned64(integer64.Integer64):
     pass

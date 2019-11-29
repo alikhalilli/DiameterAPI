@@ -1,5 +1,4 @@
-from .datatype import Type
-from grouped import GroupedAVP
+import datatype
 
 
 """
@@ -35,7 +34,7 @@ RFC 3588                Diameter Based Protocol           September 2003
 """
 
 
-class Group(Type):
+class Group(datatype.Type):
     def __init__(self, value):
         self._value = value
 

@@ -1,6 +1,5 @@
-from .datatype import Type
-from struct import pack, unpack
-from binascii import hexlify, unhexlify
+import datatype
+import struct
 """
   Time
       The Time format is derived from the OctetString AVP Base Format.
@@ -18,7 +17,7 @@ from binascii import hexlify, unhexlify
 """
 
 
-class Time(Type):
+class Time(datatype.Type):
 
     def __init__(self, value):
         self._value = value
@@ -26,14 +25,14 @@ class Time(Type):
 
     def encode(self):
         # int(self._value + self._timedelta).to_bytes(4, order='big)
-        return pack('>I', self._value + self._timedelta)
+        return struct.pack('>I', self._value + self._timedelta)
 
     def decode(self):
         pass
 
     @staticmethod
     def decodeFromBuffer(self, buff):
-        return Time(unpack('>I', buff)[0] - self._timedelta)
+        return Time(struct.unpack('>I', buff)[0] - self._timedelta)
 
     def getpadding(self):
         return 0

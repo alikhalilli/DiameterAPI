@@ -1,5 +1,5 @@
-from .octetstring import OctetString
+import octetstring
 
 
-class UTF8String(OctetString):
+class UTF8String(octetstring.OctetString):
     pass

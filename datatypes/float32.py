@@ -1,5 +1,5 @@
-from struct import pack, unpack
-from .datatype import Type
+import struct
+import datatype
 
 """
   0                   1                   2                   3
@@ -24,19 +24,19 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class Float32(Type):
+class Float32(datatype.Type):
 
     def __init__(self, value):
         super().__init__(value)
 
     def encode(self):
         # Float32 => 4 bytes
-        return pack('>f', self._value.encode('utf-8'))
+        return struct.pack('>f', self._value.encode('utf-8'))
 
     @staticmethod
     def decodeFromBuffer(buff):
         # Float32 => 4 bytes
-        return Float32(unpack('>f', buff)[0])
+        return Float32(struct.unpack('>f', buff)[0])
 
     def __len__(self):
         return 4

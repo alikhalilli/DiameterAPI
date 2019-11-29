@@ -1,5 +1,4 @@
-from struct import pack, unpack
-from binascii import hexlify, unhexlify
+import struct
 import random
 from AVPRepo import AVPTools
 
@@ -49,13 +48,13 @@ class Header:
 
     def encode(self):
         encoded = bytearray()
-        encoded[0:] = pack('>B', self._version)
+        encoded[0:] = struct.pack('>B', self._version)
         encoded[1:] = int(self._msglength).to_bytes(3, byteorder='big')
-        encoded[4:] = pack('>B',  self._cmdflags)
+        encoded[4:] = struct.pack('>B',  self._cmdflags)
         encoded[5:] = int(self._cmdcode).to_bytes(3, byteorder='big')
-        encoded[8:] = pack('>I', self._appId)
-        encoded[12:] = pack('>I', self._hopByhopId)
-        encoded[16:] = pack('>I', self._endToEndId)
+        encoded[8:] = struct.pack('>I', self._appId)
+        encoded[12:] = struct.pack('>I', self._hopByhopId)
+        encoded[16:] = struct.pack('>I', self._endToEndId)
         return encoded
 
     @staticmethod
@@ -63,13 +62,13 @@ class Header:
         if len(buff) < Header.headerlength():
             raise ValueError(f"Corrupted data {buff}")
         return Header(
-            version=unpack('>B', buff[0:1])[0],
+            version=struct.unpack('>B', buff[0:1])[0],
             msglength=int.from_bytes(buff[1:4], byteorder='big'),
-            cmdflags=unpack('>B', buff[4:5])[0],
+            cmdflags=struct.unpack('>B', buff[4:5])[0],
             cmdcode=int.from_bytes(buff[5:8], byteorder='big'),
-            appId=unpack('>I', buff[8:12])[0],
-            hopByHopId=unpack('>I', buff[12:16])[0],
-            endToEndId=unpack('>I', buff[16:20])[0]
+            appId=struct.unpack('>I', buff[8:12])[0],
+            hopByHopId=struct.unpack('>I', buff[12:16])[0],
+            endToEndId=struct.unpack('>I', buff[16:20])[0]
         )
 
     @property

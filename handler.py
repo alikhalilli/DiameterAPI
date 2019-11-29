@@ -1,16 +1,16 @@
 import asyncio
-from abc import ABC, abstractmethod
-from message import Message
+import abc
+import message
 from Errors import CommandNotFoundException
 import utils
 
 
-class Handler(ABC):
-    @abstractmethod
+class Handler(abc.ABC):
+    @abc.abstractmethod
     def next_handler(self, handler):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def handle(self, request):
         pass
 
@@ -41,7 +41,7 @@ class HeaderHandler(AbstractHandler):
         self.dpahndlr = DPAHandler()
 
     def handle(self, request):
-        Header = Message.decodeHeader(request[:20])
+        Header = message.Message.decodeHeader(request[:20])
         print(Header)
         cmdCode = Header.cmdcode
         cmdType = Header.cmdflags
@@ -71,7 +71,7 @@ class HeaderHandler(AbstractHandler):
 
 class CERHandler(AbstractHandler):
     def handle(self, request):
-        avps = [avp for avp in Message.decodeBody(request)]
+        avps = [avp for avp in message.Message.decodeBody(request)]
         for avp in avps:
             print(avp)
 

@@ -1,6 +1,4 @@
-from .octetstring import OctetString
-from .datatype import Type
-from struct import pack, unpack
+import octetstring
 import ipaddress
 from functools import reduce
 import socket
@@ -61,7 +59,7 @@ def parse_octet(octetstr):
     return(int(octetstr, 10))
 
 
-class Address(OctetString):
+class Address(octetstring.OctetString):
 
     def __init__(self, value):
         super().__init__(value)
@@ -75,6 +73,9 @@ class Address(OctetString):
         elif self._addrType == 'IPv6':
             encoded[2:18] = socket.inet_pton(socket.AF_INET6, self._value)
         return encoded
+
+    def decode(self):
+        pass
 
     @staticmethod
     def decodeFromBuffer(buff):

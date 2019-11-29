@@ -1,14 +1,4 @@
-from struct import pack, pack_into, unpack
-from binascii import hexlify, unhexlify
-from datatypes.datatype import Type
-from datatypes.integer32 import Integer32
-from datatypes.integer64 import Integer64
-from datatypes.float32 import Float32
-from datatypes.float64 import Float64
-from datatypes.octetstring import OctetString
-from datatypes.diamidentity import DiameterIdentity
-from datatypes.address import Address
-from datatypes.datatype import Type
+import struct
 from utils import types
 from AVPRepo import AVPTools
 """
@@ -53,40 +43,40 @@ class AVP:
 
     def encode(self):
         encoded = bytearray()
-        encoded[0:] = pack('>I', self._code)  # 0, 1, 2, 3
-        encoded[4:] = pack('>B', self._flags)  # 4
+        encoded[0:] = struct.pack('>I', self._code)  # 0, 1, 2, 3
+        encoded[4:] = struct.pack('>B', self._flags)  # 4
         encoded[5:] = int(self.length).to_bytes(3, byteorder='big')
         # pack('>I', self.length)[1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
         if (self._vendorID is not None) or (self.flags & avpflags['vendor']):
-            encoded[8:] = pack('>I', self._vendorID)  # 8, 9, 10, 11
+            encoded[8:] = struct.pack('>I', self._vendorID)  # 8, 9, 10, 11
         encoded[self._hlen():] = self._data.encode()
-        encoded[-1:] += pack(f">{self.padding}B",
-                             *(0 for i in range(self._padding)))
+        encoded[-1:] += struct.pack(f">{self.padding}B",
+                                    *(0 for i in range(self._padding)))
         self._encoded = encoded
         return self._encoded
 
     def decodeToSelf(self, buff):
         if len(buff) < 8:
             raise ValueError("Not enough data to decode")
-        self._code = unpack('>I', buff[:4])  # 0 1 2 3
-        self._flags = unpack('>B', buff[4])  # 4
+        self._code = struct.unpack('>I', buff[:4])  # 0 1 2 3
+        self._flags = struct.unpack('>B', buff[4])  # 4
         # unpack('>I', b'\x00' + bytedata[5:8])
         self._length = int.from_bytes(buff[5:8], byteorder='big')  # 5 6 7
         if self._flags & avpflags['vendor']:
-            self._vendorID = unpack('>I', buff[8:12])  # 8 9 10 11
+            self._vendorID = struct.unpack('>I', buff[8:12])  # 8 9 10 11
         self._data = (AVP.getType(self._code, self._vendorID)
                       ).decodeFromBuffer(buff[12:])
         return self
 
     @staticmethod
     def decodeFromBuffer(buff):
-        a_code = unpack('>I', buff[0:4])[0]
-        a_flags = unpack('>B', buff[4:5])[0]
+        a_code = struct.unpack('>I', buff[0:4])[0]
+        a_flags = struct.unpack('>B', buff[4:5])[0]
         a_length = int.from_bytes(buff[5:8], byteorder='big')
         a_vendorID = None
         a_hdrlen = 8
         if a_flags & avpflags['vendor']:
-            a_vendorID = unpack('>I', buff[8:12])[0]
+            a_vendorID = struct.unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
         a_data = types[AVP.getType(a_code, a_vendorID)].decodeFromBuffer(
             buff[a_hdrlen:a_length])
@@ -104,15 +94,15 @@ class AVP:
     @staticmethod
     def encodeFromAVP(avp):
         encoded = bytearray(avp.length)
-        encoded[0:] = pack('>I', avp.code)  # 0, 1, 2, 3
-        encoded[4:] = pack('>B', avp.flags)  # 4
+        encoded[0:] = struct.pack('>I', avp.code)  # 0, 1, 2, 3
+        encoded[4:] = struct.pack('>B', avp.flags)  # 4
         # 1:4 bytes = 3bytes ; 5, 6, 7
         encoded[5:] = int(avp.length).to_bytes(3, byteorder='big')
         #pack('>I', avp.length)[1:] if avp.length <= 0xffffff else b'Error'
-        encoded[8:] = pack('>I', avp.vendorID)  # 8, 9, 10, 11
+        encoded[8:] = struct.pack('>I', avp.vendorID)  # 8, 9, 10, 11
         encoded[12:] = avp.data.encode()
-        encoded[-1:] += pack(f">{avp.data.getpadding()}B",
-                             *(0 for i in range(avp.data.getpadding())))
+        encoded[-1:] += struct.pack(f">{avp.data.getpadding()}B",
+                                    *(0 for i in range(avp.data.getpadding())))
         return encoded
 
     @staticmethod

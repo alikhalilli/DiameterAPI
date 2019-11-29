@@ -1,4 +1,4 @@
-from .integer32 import Integer32
+import integer32
 
 """
  Enumerated
@@ -9,5 +9,5 @@ from .integer32 import Integer32
 """
 
 
-class Enumerated(Integer32):
+class Enumerated(integer32.Integer32):
     pass

@@ -1,22 +1,22 @@
-from abc import ABC, abstractmethod
+import abc
 
 
-class AbstractType(ABC):
+class AbstractType(abc.ABC):
 
-    @abstractmethod
+    @abc.abstractmethod
     def encode(self):
         raise NotImplementedError
 
-    @abstractmethod
+    @abc.abstractmethod
     def len(self):
         raise NotImplementedError
 
-    @abstractmethod
+    @abc.abstractmethod
     def getpadding(self):
         raise NotImplementedError
 
     @staticmethod
-    @abstractmethod
+    @abc.abstractmethod
     def decodeFromBuffer(self, buff):
         raise NotImplementedError
 

@@ -1,6 +1,5 @@
-from struct import pack, unpack
-from binascii import hexlify, unhexlify
-from .datatype import Type
+import struct
+import datatype
 
 """
   0                   1                   2                   3
@@ -25,7 +24,7 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class Integer64(Type):
+class Integer64(datatype.Type):
 
     def __init__(self, value):
         super().__init__(value)
@@ -33,16 +32,16 @@ class Integer64(Type):
     def decode(self, val):
         # Integer64 => 8 bytes
         # Q => unsigned long long
-        return unpack('>Q', unhexlify(self._value))
+        return struct.unpack('>Q', self._value)
 
     @staticmethod
     def decodeFromBuffer(buff):
-        return Integer64(unpack('>Q', buff)[0])
+        return Integer64(struct.unpack('>Q', buff)[0])
 
     def encode(self):
         # Integer64 => 8 bytes
         # Q => unsigned long long
-        return pack('>Q', self._value)
+        return struct.pack('>Q', self._value)
 
     def len(self):
         return self.__len__()

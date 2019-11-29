@@ -1,4 +1,4 @@
-from diameterheader import Header
+import diameterheader
 import random
 
 
@@ -10,11 +10,11 @@ class Message:
                  hopByHopId=random.getrandbits(32),
                  endToEndId=random.getrandbits(32),
                  avps=[]):
-        self.header = Header(cmdflags=cmdflags,
-                             cmdcode=cmdcode,
-                             appId=appId,
-                             hopByHopId=hopByHopId,
-                             endToEndId=endToEndId)
+        self.header = diameterheader.Header(cmdflags=cmdflags,
+                                            cmdcode=cmdcode,
+                                            appId=appId,
+                                            hopByHopId=hopByHopId,
+                                            endToEndId=endToEndId)
         self.avps = avps
         #self._encoded = None
 
@@ -33,7 +33,7 @@ class Message:
 
     @staticmethod
     def decodeHeader(buff):
-        return Header.decode(buff)
+        return diameterheader.Header.decode(buff)
 
     @staticmethod
     def decodeBody(buff):

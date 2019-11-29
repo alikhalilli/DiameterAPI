@@ -1,7 +1,6 @@
-from struct import pack, unpack
-from binascii import hexlify, unhexlify
-from .datatype import Type
-from .calcpad import new_calc_padding
+import struct
+import datatype
+import calcpad
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -25,18 +24,18 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class OctetString(Type):
+class OctetString(datatype.Type):
 
     def __init__(self, value):
         super().__init__(value)
 
     def encode(self):
         # Size is dynamic
-        return pack(f'>{len(self._value)}s', self._value.encode('utf-8'))
+        return struct.pack(f'>{len(self._value)}s', self._value.encode('utf-8'))
 
     def decode(self):
         # Size is dynamic
-        return unpack(f'>{len(self._value)//2}s', unhexlify(self._value))
+        return struct.unpack(f'>{len(self._value)//2}s', self._value)
 
     def len(self):
         return self.__len__()
@@ -45,23 +44,8 @@ class OctetString(Type):
         return len(self._value)
 
     def getpadding(self):
-        return new_calc_padding(self.len()) - self.len()
+        return calcpad.new_calc_padding(self.len()) - self.len()
 
     @staticmethod
     def decodeFromBuffer(buff):
-        return OctetString(unpack(f'>{len(buff)}s', buff)[0])
-
-
-"""    @staticmethod
-    def getAVPLen(val, vFlag=False):
-        # The AVP Length fieldc MUST be set to 12 (16 if the 'V' bit is enabled)
-        # len(AVPCode) + len(AVPFlags) + len(AVPLength) + len(AVPVendorID) + len(Int32)
-        # 4 + 1 + 3 + [4] + 8 = 16 + [4]
-        data = hexlify(struct.pack(
-            f'>{len(val)}s', val.encode('utf-8'))).decode('utf-8')
-        return 12 + len(data)/2 if vFlag else 8 + len(data)/2"""
-
-"""    @staticmethod
-    def getPaddingC(val):
-        n = len(val)
-        return get_paddingc(n) - n"""
+        return OctetString(struct.unpack(f'>{len(buff)}s', buff)[0])
