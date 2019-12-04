@@ -1,4 +1,4 @@
-import avp
+import baseavp
 
 """
   0                   1                   2                   3
@@ -40,11 +40,11 @@ class GroupedAVP:
         return encoded
 
     @staticmethod
-    def decodeFromBuffer(buff):
+    def decodeFromBuffer(grouped):
         avps = []
-        while buff:
-            a = avp.AVP.decodeFromBuffer(buff)
-            buff = buff[len(a):]
+        while grouped:
+            a = baseavp.AVP.decodeFromBuffer(grouped.value)
+            grouped = grouped[len(a):]
             avps.append(a)
         return GroupedAVP(avps)
 

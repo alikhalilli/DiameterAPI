@@ -1,4 +1,4 @@
-import octetstring
+import datatypes.octetstring as octetstring
 import ipaddress
 from functools import reduce
 import socket
@@ -22,7 +22,7 @@ addressFamily = {
 
 
 def getNatureOfAdress(val):
-    return 'IPv4'
+    return 'IPv4' if val else None
 
 
 class AdressValueError(ValueError):
@@ -74,8 +74,13 @@ class Address(octetstring.OctetString):
             encoded[2:18] = socket.inet_pton(socket.AF_INET6, self._value)
         return encoded
 
-    def decode(self):
-        pass
+    def decodeToSelf(self, buff):
+        self._addrType = buff[:2]
+        assert self._addrType is not None
+        if self._addrType == addressFamily['IPv4']['val']:
+            self._value = socket.inet_ntop(socket.AF_INET, buff[2:])
+        elif self._addrType == addressFamily['IPv6']['val']:
+            self._value = socket.inet_ntop(socket.AF_INET6, buff[2:])
 
     @staticmethod
     def decodeFromBuffer(buff):

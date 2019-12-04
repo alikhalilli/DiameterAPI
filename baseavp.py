@@ -1,6 +1,9 @@
 import struct
-from utils import types
+import datatypes.types as types
+import datatypes.decoder as decoder
 from AVPRepo import AVPTools
+import datatypes.grouped as grouped
+
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -47,7 +50,7 @@ class AVP:
         encoded[4:] = struct.pack('>B', self._flags)  # 4
         encoded[5:] = int(self.length).to_bytes(3, byteorder='big')
         # pack('>I', self.length)[1:] if self.length <= 0xffffff else b'Error'  # 1:4 bytes = 3bytes ; 5, 6, 7
-        if (self._vendorID is not None) or (self.flags & avpflags['vendor']):
+        if (self._vendorID is not None):
             encoded[8:] = struct.pack('>I', self._vendorID)  # 8, 9, 10, 11
         encoded[self._hlen():] = self._data.encode()
         encoded[-1:] += struct.pack(f">{self.padding}B",
@@ -78,14 +81,20 @@ class AVP:
         if a_flags & avpflags['vendor']:
             a_vendorID = struct.unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
-        a_data = types[AVP.getType(a_code, a_vendorID)].decodeFromBuffer(
-            buff[a_hdrlen:a_length])
+        a_data = AVP.decodeBuff(buff[a_hdrlen:a_length])
+        if isinstance(a_data, grouped.Grouped):
+            import groupedAVP
+            a_data = groupedAVP.GroupedAVP.decodeFromBuffer(a_data)
         return AVP(
             code=a_code,
             flags=a_flags,
             vendorID=a_vendorID,
             data=a_data
         )
+
+    @staticmethod
+    def decodeBuff(avpcode, vendorID=None):
+        return decoder.decoders[AVP.getType(avpcode, vendorID)]
 
     @staticmethod
     def getType(avpcode, vendorID=None):

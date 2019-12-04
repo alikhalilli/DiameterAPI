@@ -1,4 +1,4 @@
-import datatype
+import datatypes.datatype as datatype
 
 
 """
@@ -34,9 +34,13 @@ RFC 3588                Diameter Based Protocol           September 2003
 """
 
 
-class Group(datatype.Type):
+class Grouped(datatype.Type):
     def __init__(self, value):
         self._value = value
+
+    @property
+    def value(self):
+        return self._value
 
     def __len__(self):
         return len(self._value)
@@ -47,8 +51,9 @@ class Group(datatype.Type):
     def encode(self):
         return self._value
 
-    def decodeFromBuffer(self, buff):
-        return buff
-
     def getpadding(self):
         return 0
+
+    @staticmethod
+    def decodeFromBuffer(buff):
+        return Grouped(buff)

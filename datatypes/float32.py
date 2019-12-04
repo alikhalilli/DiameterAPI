@@ -1,5 +1,5 @@
 import struct
-import datatype
+import datatypes.datatype as datatype
 
 """
   0                   1                   2                   3

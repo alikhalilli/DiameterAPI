@@ -1,4 +1,4 @@
-import octetstring
+import datatypes.octetstring as octetstring
 
 """ The DiameterIdentity format is derived from the OctetString AVP
       Base Format.

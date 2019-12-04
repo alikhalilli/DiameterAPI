@@ -1,4 +1,4 @@
-import datatype
+import datatypes.datatype as datatype
 import struct
 """
   Time
@@ -25,7 +25,7 @@ class Time(datatype.Type):
 
     def encode(self):
         # int(self._value + self._timedelta).to_bytes(4, order='big)
-        return struct.pack('>I', self._value + self._timedelta)
+        return struct.pack('>I', int(self._value) + self._timedelta)
 
     def decode(self):
         pass

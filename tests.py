@@ -1,17 +1,31 @@
-from datatypes.integer32 import Integer32
-from datatypes.octetstring import OctetString
-from datatypes.diamidentity import DiameterIdentity
-from datatypes.group import Group
-from message import Message
-from datatypes.group import Group
-from grouped import GroupedAVP
-from scap import SCAPDef
-from datatypes.address import Address
-from datatypes.unsigned32 import Unsigned32
+import datatypes.integer32 as integer32
 import socket
 from abc import ABC, abstractmethod
 import utils
 import handler
+import baseavp
+import message
+import time
+import struct
+
+
+class A:
+    def __init__(self, a=[]):
+        self.a = a
+
+    def add(self, val):
+        self.a.append(val)
+        print(self.a)
+
+
+class B:
+    def __init__(self, c=None):
+        self.c = c
+
+    def add(self, val):
+        self.c += val
+        print(self.c)
+
 
 flags = dict(
     Request=1 << 7,
@@ -24,9 +38,20 @@ flags = dict(
 
 
 if __name__ == "__main__":
-    from avp import AVP, avpflags
+    a = A([])
+    a.add(0)
+    b = A([])
+    b.add(3)
 
-    cer = utils.makeCER()
+    #cer = utils.makeCER()
+    # ccr = utils.makeCCR()
+    # s1 = socket.socket()
+    # s2 = socket.socket()
+    #m = message.Message(cmdflags=0b0, cmdcode=280, appId=0)
+    #kdkdkdkdk = message.Message(cmdflags=0b0, cmdcode=280, appId=0)
+    #m3 = message.Message(cmdflags=0b0, cmdcode=280, appId=0)
+    #print(f"{id(m)}, {id(kdkdkdkdk)}, {id(m3)}")
+    # print(kdkdkdkdk._avps)
 
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = '10.1.0.12'
@@ -34,16 +59,6 @@ if __name__ == "__main__":
     client_sock.connect((host, port))
     count = 0
 
-    hdr_handler = handler.HeaderHandler()
-
-    while True:
-        data = input("input:")
-        client_sock.sendall(cer)
-        from_server = client_sock.recv(1024)
-        if from_server != b'':
-            hdr_handler.handle(from_server)
-        else:
-            client_sock.close()
 
 """
     m = Message(

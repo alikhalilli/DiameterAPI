@@ -1,5 +1,5 @@
 import socket
-import datatype
+import datatypes.datatype as datatype
 
 
 class IpAddressV6(datatype.Type):

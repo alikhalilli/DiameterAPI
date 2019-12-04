@@ -1,4 +1,4 @@
-import integer32
+import datatypes.integer32 as integer32
 
 """
  Enumerated
