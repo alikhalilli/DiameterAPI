@@ -52,9 +52,11 @@ class Message:
             encoded += avp.encode()
         return encoded
 
-    async def send(self, peer):
+    async def send(self, sessionfuturemap, peer):
+        peer.resetWatchDog()
         await peer.write(self.encode())
         future = asyncio.get_event_loop().create_future()
+        sessionfuturemap[self._session] = future
         return await future
 
     @staticmethod

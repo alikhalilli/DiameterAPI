@@ -58,7 +58,7 @@ def parse_octet(octetstr):
     return(int(octetstr, 10))
 
 
-class Address(octetstring.OctetString):
+class Address(OctetString):
 
     def __init__(self, value):
         super().__init__(value)

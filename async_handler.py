@@ -54,29 +54,31 @@ def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
     return message
 
 
-def makeCCR():
+def makeCCR(sessionId="csdk;hlapi;1611836847258625",
+            ccontext="SCAP_V.2.0@ericsson.com",
+            origHost='DESKTOP-KTP2918.azercell.com',
+            origRealm='azercell.com',
+            destRealm='azercell2.com',
+            servedmsisdn='504040098',
+            bnumber='879462'):
     from groupedAVP import GroupedAVP
     m = Message(cmdflags=flags['Request'], cmdcode=272, appId=4)
-    sessionID = AVP(code=263, flags=0x40, data=UTF8String(
-        'csdk;hlapi;1611836847258625'))
-    serviceContextID = AVP(code=461, flags=0x40,
-                           data=UTF8String('SCAP_V.2.0@ericsson.com'))
+    sessionID = AVP(code=263, flags=0x40, data=UTF8String(sessionId))
+    serviceContextID = AVP(code=461, flags=0x40, data=UTF8String(ccontext))
     authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
-    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(
-        'DESKTOP-KTP2918.azercell.com'))
-    originRealm = AVP(code=296, flags=0x40,
-                      data=DiameterIdentity('azercell.com'))
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(origHost))
+    originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(origRealm))
     ccRequestNumber = AVP(code=415, flags=0x40, data=Unsigned32(0))
     serviceIdentifier = AVP(code=439, flags=0x40, data=Unsigned32(3))
     destinationRealm = AVP(code=283, flags=0x40,
-                           data=DiameterIdentity('azercell2.com'))
+                           data=DiameterIdentity(destRealm))
     eventTimestamp = AVP(code=55, flags=0x40, data=Time(time.time()))
     subscriptionID = AVP(code=443, flags=0x40, data=GroupedAVP([
         AVP(code=450, flags=0x40, data=Enumerated(0)),
-        AVP(code=444, flags=0x40, data=UTF8String('994504040098'))
+        AVP(code=444, flags=0x40, data=UTF8String(servedmsisdn))
     ]))
     otherPartyId = AVP(code=1075, flags=0xc0, vendorID=193, data=GroupedAVP([
-        AVP(code=1077, flags=0xc0, vendorID=193, data=UTF8String('98915')),
+        AVP(code=1077, flags=0xc0, vendorID=193, data=UTF8String(bnumber)),
         AVP(code=1078, flags=0xc0, vendorID=193, data=Enumerated(0))
     ]))
     msTimeZone = AVP(code=23, flags=0xc0, vendorID=10415,
@@ -105,7 +107,7 @@ def makeCCR():
             ccRequestedServiceUnit]
     for avp in avps:
         m.addNewAVP(avp)
-    return m.encode()
+    return m
 
 ##############################################
 
@@ -115,11 +117,17 @@ class PeerTable:
         self._peers = []
         self._observers = []
 
+    def getPeer(self, peer):
+        for p in self._peers:
+            if p.name == peer:
+                return p
+
     def addPeer(self, peer):
         self._peers.append(peer)
 
     def removePeer(self, peer):
         self._peers.remove(peer)
+        self.notifyObservers()
 
     def addChangeListener(self, observer):
         self._observers.append(observer)
@@ -130,13 +138,25 @@ class PeerTable:
 
 
 class PeerStates(Enum):
-    IDLE = 0x00,
-    WAIT_ACK = 0x01
+    IDLE = auto(),
+    WAIT_CONN_ACK = auto(),
+    WAIT_I_CEA = auto(),
+    WAIT_RETURNS = auto(),
+    R_OPEN = auto(),
+    I_OPEN = auto(),
+    CLOSING = auto(),
+    ELECT = auto()
 
 
 class SessionStates(Enum):
-    IDLE = 0x00,
-    WAITING = 0x01
+    IDLE = auto(),
+    WAITING = auto(),
+    PENDINGI = auto(),
+    PENDINGU = auto(),
+    PENDINGT = auto(),
+    PENDINGE = auto(),
+    PENDINGB = auto(),
+    OPEN = auto()
 
 
 class WatchDogTask:
@@ -172,12 +192,26 @@ class Peer:
         self._state = None
 
     @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, val):
+        self._state = val
+
+    @property
     def transport(self):
         return self._transport
 
     @transport.setter
     def transport(self, val):
         self._transport = val
+
+    def startWatchDog(self):
+        self._watchdogTask.startDWR()
+
+    def resetWatchDog(self):
+        self._watchdogTask.resetDWR()
 
     def write(self, data):
         self._transport.write(data)
@@ -196,27 +230,26 @@ sessionFutureMap = dict()
 
 
 class PeerProtocol(asyncio.Protocol):
-    def __init__(self, fut=None, peer=None):
-        self._fut = fut
-        self._peer = None
+    def __init__(self, peer=None):
+        self._peer = peer
+        self._peer.state = PeerStates.WAIT_CONN_ACK
         self._handler = HeaderHandler()
         self._watchdog = None
 
     def connection_made(self, transport):
-        self._peer.transport = transport
-        self._peer.state = PeerStates.WAIT_ACK
-        # message encoding/decoding-i ayri processor core-una submit edirem
-        transport.write(await asyncio.create_subprocess_exec(makeCER()))
+        if self._peer.state == PeerStates.WAIT_CONN_ACK:
+            self._peer.transport = transport
+            self._peer.state = PeerStates.WAIT_I_CEA
+            # message encoding/decoding-i ayri processor core-una submit edirem
+            # asyncio.ensure_future(transport.write(makeCER()))
+            transport.write(makeCER(appId=4))
 
     def data_received(self, data):
         self._handler.handle(self._peer, data)
 
-    def handleCCA(self, b):
-        sessionAVP = "12343t35"
-        sessionFutureMap[sessionAVP].future.set_result(b)
-
     def connection_lost(self, exc):
-        self._fut.set_result(exc)
+        self._peer.state = PeerStates.CLOSING
+        peerTable.removePeer(self._peer)
 
 
 async def addPeer(host, port):
@@ -224,16 +257,41 @@ async def addPeer(host, port):
     protofactory = partial(PeerProtocol)
     connection_coro = loop.create_connection(
         protocol_factory=protofactory,
-        host='127.0.0.1',
-        port=8888)
+        host=host,
+        port=port)
     await asyncio.ensure_future(connection_coro)
 
 
+async def simpleCCR(peer):
+    message = makeCCR()
+    result = await message.send(sessionFutureMap, peer)
+    print(result)
+
+
+sessionFutureMap = {}
+peerTable = PeerTable()
+
+
+async def main():
+    asyncio.ensure_future(addPeer(host='127.0.0.1', port=8888))
+    asyncio.ensure_future(addPeer(host='127.0.0.1', port=8899))
+    asyncio.ensure_future(simpleCCR(peerTable.getPeer("peer01")))
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+loop.run_forever()
+
+
+"""
 async def doCCR(testcase):
     dttime -= 60
     message = makeCCR(dttime, session=True)
-    result = await message.send(peerTable["peer1"])
+    result = await message.send(sessionFutureMap, peerTable["peer1"])
     # send methodun-da await edirem future ucun
-    grantedUnit = result["message"]
+    for avp in result.result():
+        if avp.code == "431":
+            grantedUnit = avp.data.value
     while dtime % 60 > 0:
         pass
+"""

@@ -3,6 +3,7 @@ import abc
 import message
 from Errors import CommandNotFoundException
 import utils
+from async_handler import PeerStates
 
 SessionFutureMap = dict()
 
@@ -13,18 +14,18 @@ class Handler(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def handle(self, request):
+    def handle(self, peer, request):
         pass
 
 
 class AbstractHandler(Handler):
     _next_handler = None
 
-    def next_handler(self, peer, handler):
+    def next_handler(self, handler):
         self._next_handler = handler
         return handler
 
-    def handle(self, request):
+    def handle(self, peer, request):
         if self._next_handler:
             self._next_handler.handle(request)
         return None
@@ -42,9 +43,9 @@ class HeaderHandler(AbstractHandler):
         self.dpahndlr = DPAHandler()
 
     def handle(self, peer, request):
-        Header = message.Message.decodeHeader(request[:20])
-        cmdCode = Header.cmdcode
-        cmdType = Header.cmdflags
+        header = message.Message.decodeHeader(request[:20])
+        cmdCode = header.cmdcode
+        cmdType = header.cmdflags
         handler = None
         if (cmdCode == 257) & (cmdType != 0b0):
             handler = self.cerhndlr
@@ -64,35 +65,39 @@ class HeaderHandler(AbstractHandler):
             handler = self.dpahndlr
         else:
             raise CommandNotFoundException(msg="Command Not Found")
-        self.next_handler(self._peer, handler)
+        self.next_handler(handler)
         if self._next_handler:
-            self._next_handler.handle(request[20:])
+            self._next_handler.handle(peer, header, request[20:])
 
 
 class CERHandler(AbstractHandler):
-    def handle(self, request):
-        avps = [avp for avp in message.Message.decodeBody(request)]
-        for avp in avps:
-            print(avp)
+    def handle(self, peer, header, request):
+        if peer.state == PeerStates.WAIT_I_CEA:
+            avps = [avp for avp in message.Message.decodeBody(request)]
+            for avp in avps:
+                print(avp)
+            peer.state = PeerStates.I_OPEN
+            peer.startWatchDog()
 
 
 class CEAHandler(AbstractHandler):
-    def handle(self, request):
+    def handle(self, peer, header, request):
         pass
 
 
 class CCRHandler(AbstractHandler):
-    def handle(self, request):
+    def handle(self, peer, request):
         pass
 
 
 class CCAHandler(AbstractHandler):
-    def handle(self, request):
+    def handle(self, peer, header, request):
         avps = [avp for avp in message.Message.decodeBody(request)]
         for avp in avps:
             if avp.code == "263":  # session avp
                 try:
-                    SessionFutureMap[avp.data].set_result((header, avps))
+                    SessionFutureMap[avp.data.value].set_result(
+                        (peer, header, avps))
                     return
                 except KeyError:
                     print("Session not found")
@@ -104,8 +109,9 @@ class DWRHandler(AbstractHandler):
 
 
 class DWAHandler(AbstractHandler):
-    def handle(self, request):
-        pass
+    def handle(self, peer, header, request):
+        avps = [avp for avp in message.Message.decodeBody(request)]
+        peer.state = PeerStates.IDLE
 
 
 class DPRHandler(AbstractHandler):
