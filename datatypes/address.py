@@ -1,4 +1,4 @@
-from .octetstring import OctetString
+from octetstring import OctetString
 import ipaddress
 import socket
 

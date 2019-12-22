@@ -1,6 +1,7 @@
 import struct
 from .datatype import Type
-import datatypes.calcpad as calcpad
+from .calcpad import new_calc_padding
+
 """
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -44,7 +45,7 @@ class OctetString(Type):
         return len(self._value)
 
     def getpadding(self):
-        return calcpad.new_calc_padding(self.len()) - self.len()
+        return new_calc_padding(self.len()) - self.len()
 
     @staticmethod
     def decodeFromBuffer(buff):
