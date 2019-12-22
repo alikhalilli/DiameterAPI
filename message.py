@@ -1,5 +1,28 @@
 import diameterheader
 import random
+import asyncio
+
+
+"""
+Package Header Flags:
++-+-+-+-+-+-+-+-+
+|R|P|E|T|r|r|r|r|
++-+-+-+-+-+-+-+-+
+
+10000000 1<<7 0x80
+01000000 1<<6 0x40
+00100000 1<<5 0x20
+00010000 1<<4 0x10
+
+AVP Header Flags:
++-+-+-+-+-+-+-+-+
+|V|M|P|r|r|r|r|r|
++-+-+-+-+-+-+-+-+
+
+10000000 1<<7 0x80
+01000000 1<<6 0x40
+00100000 1<<5 0x20
+"""
 
 
 class Message:
@@ -10,15 +33,13 @@ class Message:
                  avps=list(),
                  hopByHopId=random.getrandbits(32),
                  endToEndId=random.getrandbits(32)):
-        print(f"new message is being created..")
         self._header = diameterheader.Header(cmdflags=cmdflags,
                                              cmdcode=cmdcode,
                                              appId=appId,
                                              hopByHopId=hopByHopId,
                                              endToEndId=endToEndId)
         self._avps = avps if avps else list()
-        # print(id(self._avps))
-        #self._encoded = None
+        self._session = None
 
     def addNewAVP(self, avp):
         self._avps.append(avp)
@@ -27,12 +48,14 @@ class Message:
     def encode(self):
         encoded = bytearray()
         encoded += self._header.encode()
-        print(f"len of avps: {len(self._avps)}")
         for avp in self._avps:
-            #print(f"encoding avp: {avp.code}")
             encoded += avp.encode()
-        #self._encoded = encoded
         return encoded
+
+    async def send(self, peer):
+        await peer.write(self.encode())
+        future = asyncio.get_event_loop().create_future()
+        return await future
 
     @staticmethod
     def decodeHeader(buff):
@@ -59,7 +82,9 @@ class Message:
 
     @property
     def avps(self):
-        return self._avps
+        if self._avps is None:
+            return []
+        return list(self._avps)
 
     @property
     def header(self):

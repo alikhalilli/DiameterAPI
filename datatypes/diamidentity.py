@@ -1,4 +1,5 @@
-import datatypes.octetstring as octetstring
+from .octetstring import OctetString
+
 
 """ The DiameterIdentity format is derived from the OctetString AVP
       Base Format.
@@ -17,5 +18,5 @@ import datatypes.octetstring as octetstring
       node, whatever the connection it is sent on."""
 
 
-class DiameterIdentity(octetstring.OctetString):
+class DiameterIdentity(OctetString):
     pass

@@ -1,4 +1,13 @@
 import abc
+import enum
+
+
+class Event(enum.Enum):
+
+
+class PeerStateMachine:
+    def __init__(self, state):
+        self._state = state
 
 
 class State(metaclass=abc.ABCMeta):
@@ -13,6 +22,10 @@ class State(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def exit(self):
+        pass
+
+    @abc.abstractmethod
+    def next_state(self):
         pass
 
 

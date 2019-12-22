@@ -1,4 +1,4 @@
-import datatypes.datatype as datatype
+from .datatype import Type
 import struct
 """
   Time
@@ -17,7 +17,7 @@ import struct
 """
 
 
-class Time(datatype.Type):
+class Time(Type):
 
     def __init__(self, value):
         self._value = value

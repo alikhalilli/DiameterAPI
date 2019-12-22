@@ -1,5 +1,5 @@
 import struct
-import datatypes.datatype as datatype
+from .datatype import Type
 import datatypes.calcpad as calcpad
 """
   0                   1                   2                   3
@@ -24,7 +24,7 @@ AVP_header_length = 8 or 12 bytes [4+1+3+(4)]
 """
 
 
-class OctetString(datatype.Type):
+class OctetString(Type):
 
     def __init__(self, value):
         super().__init__(value)

@@ -5,7 +5,7 @@ select.select
 
 server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_sock.bind(('127.0.0.1', 6666))
+server_sock.bind(('127.0.0.1', 8888))
 server_sock.listen(100)
 
 client_sock, client_addr = server_sock.accept()

@@ -21,7 +21,7 @@ def handler(conn, mask):
 
 
 sock = socket.socket()
-sock.bind(('localhost', 8888))
+sock.bind(('localhost', 8899))
 sock.listen(100)
 sock.setblocking(False)
 sel.register(sock, selectors.EVENT_READ, acceptor)

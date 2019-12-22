@@ -1,8 +1,8 @@
 import socket
-import datatypes.datatype as datatype
+from .datatype import Type
 
 
-class IpAddressV4(datatype.Type):
+class IpAddressV4(Type):
     def __init__(self, value):
         self._value = value
 

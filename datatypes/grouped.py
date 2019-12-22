@@ -1,5 +1,4 @@
-import datatypes.datatype as datatype
-
+from .datatype import Type
 
 """
  The Diameter protocol allows AVP values of type 'Grouped.'  This
@@ -34,7 +33,7 @@ RFC 3588                Diameter Based Protocol           September 2003
 """
 
 
-class Grouped(datatype.Type):
+class Grouped(Type):
     def __init__(self, value):
         self._value = value
 

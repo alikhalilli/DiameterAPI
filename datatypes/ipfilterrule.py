@@ -1,5 +1,4 @@
-import datatypes.octetstring as octetstring
-
+from .octetstring import OctetString
 
 """
 The IPFilterRule format is derived from the OctetString AVP Base
@@ -23,5 +22,5 @@ The IPFilterRule format is derived from the OctetString AVP Base
 """
 
 
-class IPFilterRule(octetstring.OctetString):
+class IPFilterRule(OctetString):
     pass

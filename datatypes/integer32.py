@@ -1,5 +1,5 @@
 import struct
-import datatypes.datatype as datatype
+from .datatype import Type
 
 """
   0                   1                   2                   3
@@ -24,7 +24,7 @@ AVP_header_length = 12 bytes [4+1+3+4]
 """
 
 
-class Integer32(datatype.Type):
+class Integer32(Type):
     def __init__(self, value):
         super().__init__(value)
 

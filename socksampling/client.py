@@ -1,18 +1,49 @@
-import socket
+import asyncio
 
-client_socks = [socket.socket(
-    socket.AF_INET, socket.SOCK_STREAM) for _ in range(10)]
 
-[client_sock.connect(('127.0.0.1', 5000)) for client_sock in client_socks]
+async def tcp_echo_client(message):
+    reader, writer = await asyncio.open_connection(
+        '127.0.0.1', 9999)
 
-count = 0
-while True:
-    count += 1
-    data = input("input:")
-    for client_sock in client_socks:
-        client_sock.sendall(data.encode('utf-8'))
-        from_server = client_sock.recv(1024)
-        if from_server != b'':
-            print(f"from server: {from_server}")
-        else:
-            client_sock.close()
+    print(f'Send: {message!r}')
+    writer.write(message.encode())
+
+    data = await reader.read(100)
+    print(f'Received: {data.decode()!r}')
+
+    print('Close the connection')
+    return writer
+
+
+async def client_writer(writer, message):
+    writer.write(message.encode())
+    await asyncio.sleep(1)
+
+
+async def DWRMessage(peer=None):
+    await asyncio.sleep(5)
+    return "DWRMessage.."
+
+
+async def CCRMessage(peer=None):
+    await asyncio.sleep(1)
+    return "CCRMessage.."
+
+
+async def main(message):
+    peerTable = []
+    writer = await tcp_echo_client(message)
+    await client_writer(writer, "salamsalam")
+    await client_writer(writer, "neynirsen")
+    while True:
+        await client_writer(writer, await DWRMessage())
+
+
+async def broker(msg):
+    await main(msg)
+
+asyncio.run(main("hello world"))
+
+task = asyncio.create_task(CCRMessage())
+loop = asyncio.get_running_loop()
+loop.run_until_complete(task)

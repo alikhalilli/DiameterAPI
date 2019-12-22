@@ -4,6 +4,8 @@ import message
 from Errors import CommandNotFoundException
 import utils
 
+SessionFutureMap = dict()
+
 
 class Handler(abc.ABC):
     @abc.abstractmethod
@@ -18,7 +20,7 @@ class Handler(abc.ABC):
 class AbstractHandler(Handler):
     _next_handler = None
 
-    def next_handler(self, handler):
+    def next_handler(self, peer, handler):
         self._next_handler = handler
         return handler
 
@@ -29,7 +31,6 @@ class AbstractHandler(Handler):
 
 
 class HeaderHandler(AbstractHandler):
-
     def __init__(self):
         self.cerhndlr = CERHandler()
         self.ceahndlr = CEAHandler()
@@ -40,9 +41,8 @@ class HeaderHandler(AbstractHandler):
         self.dprhndlr = DPRHandler()
         self.dpahndlr = DPAHandler()
 
-    def handle(self, request):
+    def handle(self, peer, request):
         Header = message.Message.decodeHeader(request[:20])
-        print(Header)
         cmdCode = Header.cmdcode
         cmdType = Header.cmdflags
         handler = None
@@ -64,7 +64,7 @@ class HeaderHandler(AbstractHandler):
             handler = self.dpahndlr
         else:
             raise CommandNotFoundException(msg="Command Not Found")
-        self.next_handler(handler)
+        self.next_handler(self._peer, handler)
         if self._next_handler:
             self._next_handler.handle(request[20:])
 
@@ -88,7 +88,14 @@ class CCRHandler(AbstractHandler):
 
 class CCAHandler(AbstractHandler):
     def handle(self, request):
-        pass
+        avps = [avp for avp in message.Message.decodeBody(request)]
+        for avp in avps:
+            if avp.code == "263":  # session avp
+                try:
+                    SessionFutureMap[avp.data].set_result((header, avps))
+                    return
+                except KeyError:
+                    print("Session not found")
 
 
 class DWRHandler(AbstractHandler):

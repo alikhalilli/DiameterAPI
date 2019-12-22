@@ -1,6 +1,5 @@
-import datatypes.octetstring as octetstring
+from .octetstring import OctetString
 import ipaddress
-from functools import reduce
 import socket
 
 addressFamily = {
