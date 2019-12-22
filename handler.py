@@ -4,7 +4,7 @@ import message
 from sessionFactory import Session
 from Errors import CommandNotFoundException
 import utils
-from async_handler import PeerStates
+from async_handler import PeerStates, SessionStates, RequestTypes
 
 sessionfuturemap = dict()
 
@@ -83,7 +83,12 @@ class CERHandler(AbstractHandler):
 
 class CEAHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        pass
+        if peer.state == PeerStates.WAIT_I_CEA:
+            avps = [avp for avp in message.Message.decodeBody(request)]
+            for avp in avps:
+                print(avp)
+            peer.state = PeerStates.I_OPEN
+            peer.startWatchDog()
 
 
 class CCRHandler(AbstractHandler):
@@ -93,15 +98,25 @@ class CCRHandler(AbstractHandler):
 
 class CCAHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        avps = [avp for avp in Session.decodeBody(request)]
-        for avp in avps:
-            if avp.code == "263":  # session avp
-                try:
-                    peer.sessionfuturemap[avp.data.value].set_result(
-                        (header, avps))
-                    return
-                except KeyError:
-                    print("Session not found")
+        avps = {avp.code: avp.data.value for avp in Session.decodeBody(
+            request)}  # dictionary O(1)
+
+        sessionid = avps["263"]  # Session AVP
+        request_type = avps["416"]  # CC-Request-Type
+
+        if request_type == RequestTypes.INITIAL_REQUEST:
+            pass
+        elif request_type == RequestTypes.UPDATE_REQUEST:
+            for avp in avps:
+                if avp.code == "263":  # session avp
+                    try:
+                        peer.sessionfuturemap[avp.data.value].set_result(
+                            (header, avps))
+                        return
+                    except KeyError:
+                        print("Session not found")
+        elif request_type == RequestTypes.TERMINATION_REQUEST:
+            pass
 
 
 class DWRHandler(AbstractHandler):
