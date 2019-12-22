@@ -1,8 +1,8 @@
 import struct
-import datatypes.types as types
 import datatypes.decoder as decoder
+from datatypes import decoder
 from AVPRepo import AVPTools
-import datatypes.grouped as grouped
+from datatypes import Grouped
 
 """
   0                   1                   2                   3
@@ -82,9 +82,9 @@ class AVP:
             a_vendorID = struct.unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
         a_data = AVP.decodeBuff(buff[a_hdrlen:a_length])
-        if isinstance(a_data, grouped.Grouped):
-            import groupedAVP
-            a_data = groupedAVP.GroupedAVP.decodeFromBuffer(a_data)
+        if isinstance(a_data, Grouped):
+            from groupedAVP import GroupedAVP
+            a_data = GroupedAVP.decodeFromBuffer(a_data)
         return AVP(
             code=a_code,
             flags=a_flags,

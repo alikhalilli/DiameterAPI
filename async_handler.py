@@ -4,6 +4,26 @@ from functools import partial
 from datatypes.diamidentity import DiameterIdentity
 from baseavp import AVP
 from message import Message
+from enum import Enum, auto
+import handler
+from datatypes.address import Address
+from datatypes.unsigned32 import Unsigned32
+from datatypes.octetstring import OctetString
+from datatypes.utf8string import UTF8String
+from datatypes.dtime import Time
+from datatypes.unsigned32 import Unsigned32
+from datatypes.unsigned64 import Unsigned64
+from datatypes.enumerated import Enumerated
+import time
+
+flags = dict(
+    Request=1 << 7,
+    Proxiable=1 << 6,
+    Error=1 << 5,
+    Retransmitted=1 << 4,
+    VendorSpecific=1 << 7,
+    Mandatory=1 << 6,
+    Protected=1 << 5)
 
 ######### Messages #############
 
@@ -17,6 +37,75 @@ def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
         m.addNewAVP(avp)
     return m.encode()
 
+
+def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
+    message = Message(cmdflags=0b0, cmdcode=257, appId=0)
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
+    originRealm = AVP(code=296, flags=64,
+                      data=DiameterIdentity(o_realm))
+    host_IP_Address = AVP(code=257, flags=0x40, data=Address(o_host))
+    vendorID = AVP(code=266, flags=0x40, data=Unsigned32(193))
+    productName = AVP(code=269, flags=0b0, data=OctetString('AiDiameter'))
+    authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
+    avps = [originHost, originRealm, host_IP_Address,
+            vendorID, productName, authAppId]
+    for avp in avps:
+        message.addNewAVP(avp)
+    return message
+
+
+def makeCCR():
+    from groupedAVP import GroupedAVP
+    m = Message(cmdflags=flags['Request'], cmdcode=272, appId=4)
+    sessionID = AVP(code=263, flags=0x40, data=UTF8String(
+        'csdk;hlapi;1611836847258625'))
+    serviceContextID = AVP(code=461, flags=0x40,
+                           data=UTF8String('SCAP_V.2.0@ericsson.com'))
+    authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(
+        'DESKTOP-KTP2918.azercell.com'))
+    originRealm = AVP(code=296, flags=0x40,
+                      data=DiameterIdentity('azercell.com'))
+    ccRequestNumber = AVP(code=415, flags=0x40, data=Unsigned32(0))
+    serviceIdentifier = AVP(code=439, flags=0x40, data=Unsigned32(3))
+    destinationRealm = AVP(code=283, flags=0x40,
+                           data=DiameterIdentity('azercell2.com'))
+    eventTimestamp = AVP(code=55, flags=0x40, data=Time(time.time()))
+    subscriptionID = AVP(code=443, flags=0x40, data=GroupedAVP([
+        AVP(code=450, flags=0x40, data=Enumerated(0)),
+        AVP(code=444, flags=0x40, data=UTF8String('994504040098'))
+    ]))
+    otherPartyId = AVP(code=1075, flags=0xc0, vendorID=193, data=GroupedAVP([
+        AVP(code=1077, flags=0xc0, vendorID=193, data=UTF8String('98915')),
+        AVP(code=1078, flags=0xc0, vendorID=193, data=Enumerated(0))
+    ]))
+    msTimeZone = AVP(code=23, flags=0xc0, vendorID=10415,
+                     data=OctetString('  '))
+    ccRequestType = AVP(code=416, flags=0x40, data=Enumerated(1))
+    ccRequestedServiceUnit = AVP(code=437, flags=0x40, data=GroupedAVP(
+        [
+            AVP(code=417, flags=0x40, data=Unsigned64(4))
+        ]
+    ))
+    requestedAction = AVP(code=436, flags=0x40, data=Enumerated(0))
+    avps = [sessionID,
+            serviceContextID,
+            authAppId,
+            originHost,
+            originRealm,
+            ccRequestNumber,
+            serviceIdentifier,
+            destinationRealm,
+            eventTimestamp,
+            subscriptionID,
+            otherPartyId,
+            msTimeZone,
+            ccRequestType,
+            requestedAction,
+            ccRequestedServiceUnit]
+    for avp in avps:
+        m.addNewAVP(avp)
+    return m.encode()
 
 ##############################################
 
@@ -40,9 +129,14 @@ class PeerTable:
             observer.update()
 
 
-class PeerStates(enum):
-    def __init__(self):
-        pass
+class PeerStates(Enum):
+    IDLE = 0x00,
+    WAIT_ACK = 0x01
+
+
+class SessionStates(Enum):
+    IDLE = 0x00,
+    WAITING = 0x01
 
 
 class WatchDogTask:
@@ -109,22 +203,13 @@ class PeerProtocol(asyncio.Protocol):
         self._watchdog = None
 
     def connection_made(self, transport):
-        global peerTable
         self._peer.transport = transport
-        await self.makeCCR()
+        self._peer.state = PeerStates.WAIT_ACK
+        # message encoding/decoding-i ayri processor core-una submit edirem
+        transport.write(await asyncio.create_subprocess_exec(makeCER()))
 
     def data_received(self, data):
         self._handler.handle(self._peer, data)
-
-    async def makeCCR(self):
-        self._peer.transport.write("CCRMessage")
-
-    def CCRHandler(self):
-        # message.decode().getSession()
-        sessionFutureMap["session"].set_result("message")
-
-    def getSessionMapping(self):
-        pass
 
     def handleCCA(self, b):
         sessionAVP = "12343t35"
