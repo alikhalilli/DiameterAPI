@@ -39,7 +39,7 @@ class Message:
                                              hopByHopId=hopByHopId,
                                              endToEndId=endToEndId)
         self._avps = avps if avps else list()
-        self._session = None
+        self._sessionId = None
 
     def addNewAVP(self, avp):
         self._avps.append(avp)
@@ -52,11 +52,11 @@ class Message:
             encoded += avp.encode()
         return encoded
 
-    async def send(self, sessionfuturemap, peer):
+    async def send(self, peer):
         peer.resetWatchDog()
         await peer.write(self.encode())
         future = asyncio.get_event_loop().create_future()
-        sessionfuturemap[self._session] = future
+        peer.sessionfuturemap[self._sessionId] = future
         return await future
 
     @staticmethod

@@ -14,6 +14,7 @@ from datatypes.dtime import Time
 from datatypes.unsigned32 import Unsigned32
 from datatypes.unsigned64 import Unsigned64
 from datatypes.enumerated import Enumerated
+from sessionFactory import Session, SessionTable
 import time
 
 flags = dict(
@@ -62,8 +63,9 @@ def makeCCR(sessionId="csdk;hlapi;1611836847258625",
             servedmsisdn='504040098',
             bnumber='879462'):
     from groupedAVP import GroupedAVP
-    m = Message(cmdflags=flags['Request'], cmdcode=272, appId=4)
-    sessionID = AVP(code=263, flags=0x40, data=UTF8String(sessionId))
+    m = Session(cmdflags=flags['Request'],
+                cmdcode=272, appId=4, sessionId=sessionId)
+    #sessionID = AVP(code=263, flags=0x40, data=UTF8String(sessionId))
     serviceContextID = AVP(code=461, flags=0x40, data=UTF8String(ccontext))
     authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(origHost))
@@ -90,8 +92,7 @@ def makeCCR(sessionId="csdk;hlapi;1611836847258625",
         ]
     ))
     requestedAction = AVP(code=436, flags=0x40, data=Enumerated(0))
-    avps = [sessionID,
-            serviceContextID,
+    avps = [serviceContextID,
             authAppId,
             originHost,
             originRealm,
@@ -107,6 +108,7 @@ def makeCCR(sessionId="csdk;hlapi;1611836847258625",
             ccRequestedServiceUnit]
     for avp in avps:
         m.addNewAVP(avp)
+    # sessTable.insertSession(sessionId, m._state)
     return m
 
 ##############################################
@@ -166,8 +168,12 @@ class WatchDogTask:
         self._currentTask = None
 
     def resetDWR(self):
-        self._currentTask.cancel()
-        self._currentTask = asyncio.ensure_future(self.sendDWR())
+        self.cancelDWR()
+        self.startDWR()
+
+    def cancelDWR(self):
+        if self._currentTask:
+            self._currentTask.cancel()
 
     def startDWR(self):
         self._currentTask = asyncio.ensure_future(self.sendDWR())
@@ -188,8 +194,25 @@ class Peer:
         self._firmwareId = firmwareId
         self._vendorId = vendorId
         self._transport = transport
+        self._sessionFutureMap = dict()
         self._watchdogTask = WatchDogTask(watchdogInterval, self)
         self._state = None
+        self._stateObservers = []
+
+    def addStateChangeListener(self, observer):
+        self._stateObservers.append(observer)
+
+    def notifyStateChange(self):
+        for observer in self._stateObservers:
+            observer.stateChanged(self)
+
+    @property
+    def sessionFutureMap(self):
+        return self._sessionFutureMap
+
+    @sessionFutureMap.setter
+    def sessionFutureMap(self, val):
+        self._sessionFutureMap = val
 
     @property
     def state(self):
@@ -198,6 +221,7 @@ class Peer:
     @state.setter
     def state(self, val):
         self._state = val
+        self.notifyStateChange()
 
     @property
     def transport(self):
@@ -220,12 +244,8 @@ class Peer:
         return self._transport.read()
 
 
+sessTable = SessionTable()
 peerTable = PeerTable()
-peer = Peer(appId=192,
-            firmwareId=193,
-            vendorId=194,
-            transport=None,
-            watchdogInterval=5)
 sessionFutureMap = dict()
 
 
@@ -254,21 +274,24 @@ class PeerProtocol(asyncio.Protocol):
 
 async def addPeer(host, port):
     loop = asyncio.get_event_loop()
-    protofactory = partial(PeerProtocol)
+    protofactory = partial(PeerProtocol, Peer(appId=192,
+                                              firmwareId=193,
+                                              vendorId=194,
+                                              transport=None,
+                                              watchdogInterval=5))
     connection_coro = loop.create_connection(
         protocol_factory=protofactory,
         host=host,
         port=port)
-    await asyncio.ensure_future(connection_coro)
+    asyncio.ensure_future(connection_coro)  # await elemesende olar
 
 
 async def simpleCCR(peer):
-    message = makeCCR()
-    result = await message.send(sessionFutureMap, peer)
+    session = makeCCR()
+    result = await session.send(peer)
     print(result)
 
 
-sessionFutureMap = {}
 peerTable = PeerTable()
 
 
@@ -276,7 +299,6 @@ async def main():
     asyncio.ensure_future(addPeer(host='127.0.0.1', port=8888))
     asyncio.ensure_future(addPeer(host='127.0.0.1', port=8899))
     asyncio.ensure_future(simpleCCR(peerTable.getPeer("peer01")))
-
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())

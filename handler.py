@@ -1,11 +1,12 @@
 import asyncio
 import abc
 import message
+from sessionFactory import Session
 from Errors import CommandNotFoundException
 import utils
 from async_handler import PeerStates
 
-SessionFutureMap = dict()
+sessionfuturemap = dict()
 
 
 class Handler(abc.ABC):
@@ -92,12 +93,12 @@ class CCRHandler(AbstractHandler):
 
 class CCAHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        avps = [avp for avp in message.Message.decodeBody(request)]
+        avps = [avp for avp in Session.decodeBody(request)]
         for avp in avps:
             if avp.code == "263":  # session avp
                 try:
-                    SessionFutureMap[avp.data.value].set_result(
-                        (peer, header, avps))
+                    peer.sessionfuturemap[avp.data.value].set_result(
+                        (header, avps))
                     return
                 except KeyError:
                     print("Session not found")
@@ -112,6 +113,7 @@ class DWAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         avps = [avp for avp in message.Message.decodeBody(request)]
         peer.state = PeerStates.IDLE
+        peer.resetWatchDog()
 
 
 class DPRHandler(AbstractHandler):
