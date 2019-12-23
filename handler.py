@@ -101,7 +101,6 @@ class CCAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         avps = {avp.code: avp.data.value for avp in Session.decodeBody(
             request)}  # dictionary O(1)
-
         sessionid = avps["263"]  # Session AVP
         request_type = avps["416"]  # CC-Request-Type
 
@@ -122,14 +121,21 @@ class CCAHandler(AbstractHandler):
 
 class DWRHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        peer.transport.write(boilerplatemessages.makeDWA(appId=0))
+        if peer.state == PeerStates.I_OPEN:
+            peer.transport.write(boilerplatemessages.makeDWA())
+            peer.state = PeerStates.I_OPEN
+        return
 
 
 class DWAHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        avps = [avp for avp in Message.decodeBody(request)]
-        peer.state = PeerStates.IDLE
-        peer.resetWatchDog()
+        avps = {avp.code: avp.data.value for avp in Message.decodeBody(
+                request)}
+        if avp["268"] == 2001:
+            peer.state = PeerStates.I_OPEN
+            peer.resetWatchDog()
+        else:
+            peer.transport.write(boilerplatemessages.makeDPR())
 
 
 class DPRHandler(AbstractHandler):

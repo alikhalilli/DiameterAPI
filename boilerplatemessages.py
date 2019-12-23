@@ -130,4 +130,23 @@ def makeCCR(sessionId="csdk;hlapi;1611836847258625",
     # sessTable.insertSession(sessionId, m._state)
     return m
 
+
+def makeDPR(o_host='10.5.8.11', o_realm='azercell.com'):
+    m = Message(cmdflags=MessageFlags.REQUEST.value, cmdcode=280, appId=0)
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
+    originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
+    avps = [originHost, originRealm]
+    for avp in avps:
+        m.addNewAVP(avp)
+    return m.encode()
+
+
+def makeDPA(o_host='10.5.8.11', o_realm='azercell.com'):
+    m = Message(cmdflags=MessageFlags.REQUEST.value, cmdcode=280, appId=0)
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
+    originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
+    avps = [originHost, originRealm]
+    for avp in avps:
+        m.addNewAVP(avp)
+    return m.encode()
 ##############################################

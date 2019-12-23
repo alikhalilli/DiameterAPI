@@ -3,25 +3,25 @@ from watchdogtask import WatchDogTask
 
 
 class PeerStates(Enum):
-    IDLE = auto(),
     WAIT_CONN_ACK = auto(),
     WAIT_I_CEA = auto(),
     WAIT_RETURNS = auto(),
     R_OPEN = auto(),
     I_OPEN = auto(),
     CLOSING = auto(),
-    ELECT = auto()
+    ELECT = auto(),
+    CLOSED = auto()
 
 
 class Peer:
-    def __init__(self, appId, firmwareId, vendorId, transport, watchdogInterval):
+    def __init__(self, appId, firmwareId, vendorId, transport, watchdogInterval, state=None):
         self._appId = appId
         self._firmwareId = firmwareId
         self._vendorId = vendorId
         self._transport = transport
         self._sessionFutureMap = dict()
         self._watchdogTask = WatchDogTask(watchdogInterval, self)
-        self._state = None
+        self._state = state
         self._stateObservers = []
 
     def addStateChangeListener(self, observer):

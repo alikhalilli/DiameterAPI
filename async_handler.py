@@ -23,15 +23,16 @@ class PeerProtocol(asyncio.Protocol):
         if self._peer.state == PeerStates.WAIT_CONN_ACK:
             self._peer.transport = transport
             self._peer.state = PeerStates.WAIT_I_CEA
+            transport.write(boilerplatemessages.makeCER())
             # message encoding/decoding-i ayri processor core-una submit edirem
             # asyncio.ensure_future(transport.write(makeCER()))
-            transport.write(boilerplatemessages.makeCER(appId=4))
 
     def data_received(self, data):
-        self._handler.handle(self._peer, data)
+        if self._peer.state in PeerStates.I_OPEN:
+            self._handler.handle(self._peer, data)
 
     def connection_lost(self, exc):
-        self._peer.state = PeerStates.CLOSING
+        self._peer.state = PeerStates.CLOSED
         peerTable.removePeer(self._peer)
 
 
@@ -41,7 +42,8 @@ async def addPeer(host, port):
                                               firmwareId=193,
                                               vendorId=194,
                                               transport=None,
-                                              watchdogInterval=5))
+                                              watchdogInterval=5,
+                                              state=PeerStates.CLOSED))
     connection_coro = loop.create_connection(
         protocol_factory=protofactory,
         host=host,
