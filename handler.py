@@ -133,7 +133,7 @@ class DWAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         avps = {avp.code: avp.data.value for avp in Message.decodeBody(
                 request)}
-        if avps["268"] == 2001:
+        if avps[268] == 2001:
             peer.state = PeerStates.I_OPEN
             peer.resetWatchDog()
         else:
