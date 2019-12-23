@@ -4,6 +4,7 @@ from functools import partial
 from sessionFactory import Session, SessionTable
 from peertable import PeerTable
 from peer import Peer, PeerStates
+import boilerplatemessages
 
 
 sessTable = SessionTable()
@@ -24,7 +25,7 @@ class PeerProtocol(asyncio.Protocol):
             self._peer.state = PeerStates.WAIT_I_CEA
             # message encoding/decoding-i ayri processor core-una submit edirem
             # asyncio.ensure_future(transport.write(makeCER()))
-            transport.write(makeCER(appId=4))
+            transport.write(boilerplatemessages.makeCER(appId=4))
 
     def data_received(self, data):
         self._handler.handle(self._peer, data)
@@ -49,7 +50,7 @@ async def addPeer(host, port):
 
 
 async def simpleCCR(peer):
-    session = makeCCR()
+    session = boilerplatemessages.makeCCR()
     result = await session.send(peer)
     print(result)
 
@@ -58,9 +59,9 @@ peerTable = PeerTable()
 
 
 async def main():
-    asyncio.ensure_future(addPeer(host='127.0.0.1', port=8888))
-    asyncio.ensure_future(addPeer(host='127.0.0.1', port=8899))
-    asyncio.ensure_future(simpleCCR(peerTable.getPeer("peer01")))
+    asyncio.ensure_future(addPeer(host='10.1.0.12', port=3868))
+    # asyncio.ensure_future(addPeer(host='127.0.0.1', port=8899))
+    # asyncio.ensure_future(simpleCCR(peerTable.getPeer("peer01")))
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
