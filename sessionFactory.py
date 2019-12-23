@@ -6,6 +6,13 @@ import random
 from enum import Enum, auto
 
 
+class RequestTypes(Enum):
+    INITIAL_REQUEST = auto()
+    UPDATE_REQUEST = auto()
+    TERMINATION_REQUEST = auto()
+    EVENT_REQUEST = auto()
+
+
 class SessionStates(Enum):
     IDLE = auto(),
     WAITING = auto(),
