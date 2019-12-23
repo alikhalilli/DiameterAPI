@@ -104,7 +104,7 @@ class CCAHandler(AbstractHandler):
         sessionid = avps["263"]  # Session AVP
         request_type = avps["416"]  # CC-Request-Type
 
-        if request_type == RequestTypes.INITIAL_REQUEST:
+        if request_type == RequestTypes.INITIAL_REQUEST.value:
             pass
         elif request_type == RequestTypes.UPDATE_REQUEST:
             for avp in avps:
@@ -131,7 +131,7 @@ class DWAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         avps = {avp.code: avp.data.value for avp in Message.decodeBody(
                 request)}
-        if avp["268"] == 2001:
+        if avps["268"] == 2001:
             peer.state = PeerStates.I_OPEN
             peer.resetWatchDog()
         else:

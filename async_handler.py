@@ -52,9 +52,10 @@ async def addPeer(host, port):
 
 
 async def simpleCCR(peer):
-    session = boilerplatemessages.makeCCR()
-    result = await session.send(peer)
-    print(result)
+    if peer.state == PeerStates.I_OPEN:
+        session = boilerplatemessages.makeCCR()
+        result = await session.send(peer)
+        print(result)
 
 
 peerTable = PeerTable()

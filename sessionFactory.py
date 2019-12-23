@@ -3,14 +3,14 @@ from diameterheader import Header
 from baseavp import AVP
 from datatypes import OctetString
 import random
-from enum import Enum, auto
+from enum import Enum, IntEnum, auto
 
 
 class RequestTypes(Enum):
-    INITIAL_REQUEST = auto()
-    UPDATE_REQUEST = auto()
-    TERMINATION_REQUEST = auto()
-    EVENT_REQUEST = auto()
+    INITIAL_REQUEST = 0
+    UPDATE_REQUEST = 1
+    TERMINATION_REQUEST = 2
+    EVENT_REQUEST = 3
 
 
 class SessionStates(Enum):
