@@ -82,7 +82,7 @@ class AVP:
         if a_flags & AVPFlags.VENDORSPECIFIC.value:
             a_vendorID = struct.unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
-        a_data = AVP.decodeBuff(buff[a_hdrlen:a_length])
+        a_data = AVP.decodeBuff(a_code)(buff[a_hdrlen:a_length])
         if isinstance(a_data, Grouped):
             from groupedAVP import GroupedAVP
             a_data = GroupedAVP.decodeFromBuffer(a_data)
@@ -95,7 +95,6 @@ class AVP:
 
     @staticmethod
     def decodeBuff(avpcode, vendorID=None):
-        print(f"avpcode: {avpcode}")
         return decoder.decoders[AVP.getType(avpcode, vendorID)]
 
     @staticmethod

@@ -28,7 +28,7 @@ class PeerProtocol(asyncio.Protocol):
             # asyncio.ensure_future(transport.write(makeCER()))
 
     def data_received(self, data):
-        if self._peer.state in PeerStates.I_OPEN:
+        if self._peer.state in [PeerStates.I_OPEN, PeerStates.WAIT_I_CEA]:
             self._handler.handle(self._peer, data)
 
     def connection_lost(self, exc):
