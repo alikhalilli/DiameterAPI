@@ -18,7 +18,7 @@ from datatypes.diamidentity import DiameterIdentity
 ######### Messages #############
 
 
-def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
+def makeDWR(o_host='10.5.8.11', o_realm='azercell.com'):
     m = Message(cmdflags=MessageFlags.REQUEST.value, cmdcode=280, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
     originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
@@ -28,8 +28,10 @@ def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
     return m.encode()
 
 
-def makeDWA(appId, o_host='10.5.8.11', o_realm='azercell.com'):
-    m = Message(cmdflags=0b0, cmdcode=280, appId=0)
+def makeDWA(resultCode=2001, o_host='10.5.8.11', o_realm='azercell.com'):
+    m = Message(cmdflags=0x00, cmdcode=280, appId=0)
+    resultCode = AVP(code=268, flags=AVPFlags.MANDATORY,
+                     data=Unsigned32(resultCode))
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
     originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
     avps = [originHost, originRealm]
@@ -38,7 +40,7 @@ def makeDWA(appId, o_host='10.5.8.11', o_realm='azercell.com'):
     return m.encode()
 
 
-def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
+def makeCER(o_host='10.5.8.11', o_realm='azercell.com', prod_name='AiDiameter'):
     message = Message(cmdflags=MessageFlags.REQUEST.value,
                       cmdcode=257, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
@@ -46,7 +48,24 @@ def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
                       data=DiameterIdentity(o_realm))
     host_IP_Address = AVP(code=257, flags=0x40, data=Address(o_host))
     vendorID = AVP(code=266, flags=0x40, data=Unsigned32(193))
-    productName = AVP(code=269, flags=0b0, data=OctetString('AiDiameter'))
+    productName = AVP(code=269, flags=0x00, data=OctetString(prod_name))
+    authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
+    avps = [originHost, originRealm, host_IP_Address,
+            vendorID, productName, authAppId]
+    for avp in avps:
+        message.addNewAVP(avp)
+    return message
+
+
+def makeCEA(o_host='10.5.8.11', o_realm='azercell.com', prod_name='AiDiameter'):
+    message = Message(cmdflags=0x00,
+                      cmdcode=257, appId=0)
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
+    originRealm = AVP(code=296, flags=64,
+                      data=DiameterIdentity(o_realm))
+    host_IP_Address = AVP(code=257, flags=0x40, data=Address(o_host))
+    vendorID = AVP(code=266, flags=0x40, data=Unsigned32(193))
+    productName = AVP(code=269, flags=0x00, data=OctetString(prod_name))
     authAppId = AVP(code=258, flags=0x40, data=Unsigned32(4))
     avps = [originHost, originRealm, host_IP_Address,
             vendorID, productName, authAppId]

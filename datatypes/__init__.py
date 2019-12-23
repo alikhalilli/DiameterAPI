@@ -17,3 +17,4 @@ from .octetstring import OctetString
 from .unsigned32 import Unsigned32
 from .unsigned64 import Unsigned64
 from .utf8string import UTF8String
+from .grouped import Grouped

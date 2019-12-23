@@ -19,6 +19,7 @@
 4 octets = 32 bytes
 AVP_header_length = 12 bytes [4+1+3+4]
 """
+from datatypes import Grouped
 
 
 class GroupedAVP:
@@ -37,13 +38,17 @@ class GroupedAVP:
             encoded += avp.encode()
         return encoded
 
+    @property
+    def value(self):
+        return {avp.code: avp.data.value for avp in self._AVPs}
+
     @staticmethod
     def decodeFromBuffer(grouped):
         from baseavp import AVP
         avps = []
-        while grouped:
+        while grouped.value:
             a = AVP.decodeFromBuffer(grouped.value)
-            grouped = grouped[len(a):]
+            grouped = Grouped(grouped.value[len(a):])
             avps.append(a)
         return GroupedAVP(avps)
 

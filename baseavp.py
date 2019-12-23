@@ -3,6 +3,7 @@ import datatypes.decoder as decoder
 from datatypes import decoder
 from AVPRepo import AVPTools
 from datatypes import Grouped
+from headerflags import AVPFlags
 
 """
   0                   1                   2                   3
@@ -65,7 +66,7 @@ class AVP:
         self._flags = struct.unpack('>B', buff[4])  # 4
         # unpack('>I', b'\x00' + bytedata[5:8])
         self._length = int.from_bytes(buff[5:8], byteorder='big')  # 5 6 7
-        if self._flags & avpflags['vendor']:
+        if self._flags & AVPFlags.VENDORSPECIFIC.value:
             self._vendorID = struct.unpack('>I', buff[8:12])  # 8 9 10 11
         self._data = (AVP.getType(self._code, self._vendorID)
                       ).decodeFromBuffer(buff[12:])
@@ -78,7 +79,7 @@ class AVP:
         a_length = int.from_bytes(buff[5:8], byteorder='big')
         a_vendorID = None
         a_hdrlen = 8
-        if a_flags & avpflags['vendor']:
+        if a_flags & AVPFlags.VENDORSPECIFIC.value:
             a_vendorID = struct.unpack('>I', buff[8:12])[0]
             a_hdrlen += 4
         a_data = AVP.decodeBuff(buff[a_hdrlen:a_length])

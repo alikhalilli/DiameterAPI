@@ -10,7 +10,7 @@ class WatchDogTask:
 
     def resetDWR(self):
         self.cancelDWR()
-        self.startDWR()
+        # self.startDWR()
 
     def cancelDWR(self):
         if self._currentTask:
@@ -23,7 +23,6 @@ class WatchDogTask:
         while True:
             await asyncio.sleep(self._interval)
             self._peer.transport.write(
-                boilerplatemessages.makeDWR(self._peer.appId,
-                                            self._peer.origHost,
+                boilerplatemessages.makeDWR(self._peer.origHost,
                                             self._peer.origRealm
                                             ))
