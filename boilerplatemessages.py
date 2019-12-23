@@ -19,7 +19,7 @@ from datatypes.diamidentity import DiameterIdentity
 
 
 def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
-    m = Message(cmdflags=MessageFlags.REQUEST, cmdcode=280, appId=0)
+    m = Message(cmdflags=MessageFlags.REQUEST.value, cmdcode=280, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
     originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
     avps = [originHost, originRealm]
@@ -29,7 +29,8 @@ def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
 
 
 def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
-    message = Message(cmdflags=MessageFlags.REQUEST, cmdcode=257, appId=0)
+    message = Message(cmdflags=MessageFlags.REQUEST.value,
+                      cmdcode=257, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
     originRealm = AVP(code=296, flags=64,
                       data=DiameterIdentity(o_realm))
@@ -52,7 +53,7 @@ def makeCCR(sessionId="csdk;hlapi;1611836847258625",
             servedmsisdn='504040098',
             bnumber='879462'):
     from groupedAVP import GroupedAVP
-    m = Session(cmdflags=MessageFlags.REQUEST,
+    m = Session(cmdflags=MessageFlags.REQUEST.value,
                 cmdcode=272, appId=4, sessionId=sessionId)
     #sessionID = AVP(code=263, flags=0x40, data=UTF8String(sessionId))
     serviceContextID = AVP(code=461, flags=0x40, data=UTF8String(ccontext))

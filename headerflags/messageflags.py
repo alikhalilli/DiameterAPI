@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class MessageFlags(Enum):
+class MessageFlags(IntEnum):
     REQUEST = 1 << 7,
     PROXIABLE = 1 << 6,
     ERROR = 1 << 5,

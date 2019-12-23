@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 
 """
 Package Header Flags:
@@ -22,7 +22,7 @@ AVP Header Flags:
 """
 
 
-class AVPFlags(Enum):
+class AVPFlags(IntEnum):
     VENDORSPECIFIC = 1 << 7,  # 0b00000001 -> 0b10000000
     MANDATORY = 1 << 6,
     PROTECTED = 1 << 5
