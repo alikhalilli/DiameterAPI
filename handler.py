@@ -102,11 +102,12 @@ class CCAHandler(AbstractHandler):
         avps = {avp.code: avp.data.value for avp in Session.decodeBody(
             request)}  # dictionary O(1)
         print(avps)
-        sessionid = avps["263"]  # Session AVP
-        request_type = avps["416"]  # CC-Request-Type
+        sessionid = avps[263].decode()  # Session AVP
+        request_type = avps[416]  # CC-Request-Type
 
         if request_type == RequestTypes.INITIAL_REQUEST.value:
-            pass
+            peer.sessionfuturemap[sessionid].set_result(
+                (header, avps))
         elif request_type == RequestTypes.UPDATE_REQUEST:
             for avp in avps:
                 if avp.code == "263":  # session avp

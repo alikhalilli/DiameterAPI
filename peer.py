@@ -36,7 +36,7 @@ class Peer:
         return self._sessionFutureMap
 
     @sessionFutureMap.setter
-    def sessionFutureMap(self, val):
+    def sessionfuturemap(self, val):
         self._sessionFutureMap = val
 
     @property

@@ -22,7 +22,4 @@ class WatchDogTask:
     async def sendDWR(self):
         while True:
             await asyncio.sleep(self._interval)
-            self._peer.transport.write(
-                boilerplatemessages.makeDWR(self._peer.origHost,
-                                            self._peer.origRealm
-                                            ))
+            self._peer.transport.write(boilerplatemessages.makeDWR())

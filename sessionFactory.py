@@ -38,7 +38,7 @@ class Session(Message):
         self._state = SessionStates.IDLE
         self._avps.append(AVP(
             code=263,
-            flags=0x00,
+            flags=0x40,
             data=OctetString(self._sessionId)
         ))
 
