@@ -94,6 +94,7 @@ class AVP:
 
     @staticmethod
     def decodeBuff(avpcode, vendorID=None):
+        print(f"avpcode: {avpcode}")
         return decoder.decoders[AVP.getType(avpcode, vendorID)]
 
     @staticmethod

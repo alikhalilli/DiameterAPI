@@ -28,6 +28,16 @@ def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
     return m.encode()
 
 
+def makeDWA(appId, o_host='10.5.8.11', o_realm='azercell.com'):
+    m = Message(cmdflags=0b0, cmdcode=280, appId=0)
+    originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
+    originRealm = AVP(code=296, flags=0x40, data=DiameterIdentity(o_realm))
+    avps = [originHost, originRealm]
+    for avp in avps:
+        m.addNewAVP(avp)
+    return m.encode()
+
+
 def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
     message = Message(cmdflags=MessageFlags.REQUEST.value,
                       cmdcode=257, appId=0)

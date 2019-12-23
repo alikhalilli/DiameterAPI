@@ -5,6 +5,7 @@ from sessionFactory import Session, SessionStates, RequestTypes
 from peer import PeerStates
 from Errors import CommandNotFoundException
 import utils
+import boilerplatemessages
 
 sessionfuturemap = dict()
 
@@ -120,8 +121,8 @@ class CCAHandler(AbstractHandler):
 
 
 class DWRHandler(AbstractHandler):
-    def handle(self, request, conn):
-        conn.sendall(utils.makeDWA())
+    def handle(self, peer, header, request):
+        peer.transport.write(boilerplatemessages.makeDWA(appId=0))
 
 
 class DWAHandler(AbstractHandler):
