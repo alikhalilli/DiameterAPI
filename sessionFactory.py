@@ -2,8 +2,19 @@ from message import Message
 from diameterheader import Header
 from baseavp import AVP
 from datatypes import OctetString
-from async_handler import SessionStates
 import random
+from enum import Enum, auto
+
+
+class SessionStates(Enum):
+    IDLE = auto(),
+    WAITING = auto(),
+    PENDINGI = auto(),
+    PENDINGU = auto(),
+    PENDINGT = auto(),
+    PENDINGE = auto(),
+    PENDINGB = auto(),
+    OPEN = auto()
 
 
 class Session(Message):
