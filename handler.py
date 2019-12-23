@@ -101,6 +101,7 @@ class CCAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         avps = {avp.code: avp.data.value for avp in Session.decodeBody(
             request)}  # dictionary O(1)
+        print(avps)
         sessionid = avps["263"]  # Session AVP
         request_type = avps["416"]  # CC-Request-Type
 

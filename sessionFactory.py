@@ -7,10 +7,10 @@ from enum import Enum, IntEnum, auto
 
 
 class RequestTypes(Enum):
-    INITIAL_REQUEST = 0
-    UPDATE_REQUEST = 1
-    TERMINATION_REQUEST = 2
-    EVENT_REQUEST = 3
+    INITIAL_REQUEST = 1
+    UPDATE_REQUEST = 2
+    TERMINATION_REQUEST = 3
+    EVENT_REQUEST = 4
 
 
 class SessionStates(Enum):
@@ -38,7 +38,7 @@ class Session(Message):
         self._state = SessionStates.IDLE
         self._avps.append(AVP(
             code=263,
-            flags=0b0,
+            flags=0x00,
             data=OctetString(self._sessionId)
         ))
 
