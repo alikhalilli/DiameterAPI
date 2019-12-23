@@ -1,10 +1,10 @@
 import asyncio
 import abc
-import message
-from sessionFactory import Session
+from message import Message
+from sessionFactory import Session, SessionStates, RequestTypes
+from peer import PeerStates
 from Errors import CommandNotFoundException
 import utils
-from async_handler import PeerStates, SessionStates, RequestTypes
 
 sessionfuturemap = dict()
 
@@ -44,7 +44,7 @@ class HeaderHandler(AbstractHandler):
         self.dpahndlr = DPAHandler()
 
     def handle(self, peer, request):
-        header = message.Message.decodeHeader(request[:20])
+        header = Message.decodeHeader(request[:20])
         cmdCode = header.cmdcode
         cmdType = header.cmdflags
         handler = None
@@ -74,7 +74,7 @@ class HeaderHandler(AbstractHandler):
 class CERHandler(AbstractHandler):
     def handle(self, peer, header, request):
         if peer.state == PeerStates.WAIT_I_CEA:
-            avps = [avp for avp in message.Message.decodeBody(request)]
+            avps = [avp for avp in Message.decodeBody(request)]
             for avp in avps:
                 print(avp)
             peer.state = PeerStates.I_OPEN
@@ -84,7 +84,7 @@ class CERHandler(AbstractHandler):
 class CEAHandler(AbstractHandler):
     def handle(self, peer, header, request):
         if peer.state == PeerStates.WAIT_I_CEA:
-            avps = [avp for avp in message.Message.decodeBody(request)]
+            avps = [avp for avp in Message.decodeBody(request)]
             for avp in avps:
                 print(avp)
             peer.state = PeerStates.I_OPEN
@@ -92,7 +92,7 @@ class CEAHandler(AbstractHandler):
 
 
 class CCRHandler(AbstractHandler):
-    def handle(self, peer, request):
+    def handle(self, peer, header, request):
         pass
 
 
@@ -126,7 +126,7 @@ class DWRHandler(AbstractHandler):
 
 class DWAHandler(AbstractHandler):
     def handle(self, peer, header, request):
-        avps = [avp for avp in message.Message.decodeBody(request)]
+        avps = [avp for avp in Message.decodeBody(request)]
         peer.state = PeerStates.IDLE
         peer.resetWatchDog()
 

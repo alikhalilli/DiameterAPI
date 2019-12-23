@@ -29,7 +29,7 @@ def makeDWR(appId, o_host='10.5.8.11', o_realm='azercell.com'):
 
 
 def makeCER(appId, o_host='10.5.8.11', o_realm='azercell.com'):
-    message = Message(cmdflags=0b0, cmdcode=257, appId=0)
+    message = Message(cmdflags=MessageFlags.REQUEST, cmdcode=257, appId=0)
     originHost = AVP(code=264, flags=0x40, data=DiameterIdentity(o_host))
     originRealm = AVP(code=296, flags=64,
                       data=DiameterIdentity(o_realm))
