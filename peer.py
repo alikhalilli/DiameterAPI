@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from watchdogtask import WatchDogTask
+import asyncio
 
 
 class PeerStates(Enum):
@@ -14,10 +15,11 @@ class PeerStates(Enum):
 
 
 class Peer:
-    def __init__(self, appId, firmwareId, vendorId, transport, watchdogInterval, state=None):
+    def __init__(self, hostID, appId, firmwareId, vendorId, transport, watchdogInterval, state=None):
         self._appId = appId
         self._firmwareId = firmwareId
         self._vendorId = vendorId
+        self._hostIdentity = hostID
         self._transport = transport
         self._sessionFutureMap = dict()
         self._watchdogTask = WatchDogTask(watchdogInterval, self)

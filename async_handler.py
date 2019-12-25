@@ -43,6 +43,7 @@ async def addPeer(host, port):
                                               vendorId=194,
                                               transport=None,
                                               watchdogInterval=5,
+                                              hostID="TestCCN",
                                               state=PeerStates.CLOSED))
     connection_coro = loop.create_connection(
         protocol_factory=protofactory,

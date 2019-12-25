@@ -83,7 +83,7 @@ class Address(OctetString):
 
     @staticmethod
     def decodeFromBuffer(buff):
-        _addrType = buff[:2]
+        _addrType = buff[:2]  # first two bytes for adress type
         if _addrType == addressFamily['IPv4']['val']:
             return Address(socket.inet_ntop(socket.AF_INET, buff[2:]))
         elif _addrType == addressFamily['IPv6']['val']:

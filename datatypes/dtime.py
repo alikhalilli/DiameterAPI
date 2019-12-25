@@ -19,20 +19,21 @@ import struct
 
 class Time(Type):
 
+    _timedelta = 2208988800
+
     def __init__(self, value):
         self._value = value
-        self._timedelta = 2208988800
 
     def encode(self):
         # int(self._value + self._timedelta).to_bytes(4, order='big)
-        return struct.pack('>I', int(self._value) + self._timedelta)
+        return struct.pack('>I', int(self._value) + 2208988800)
 
     def decode(self):
         pass
 
     @staticmethod
-    def decodeFromBuffer(self, buff):
-        return Time(struct.unpack('>I', buff)[0] - self._timedelta)
+    def decodeFromBuffer(buff):
+        return Time(struct.unpack('>I', buff)[0] - 2208988800)
 
     def getpadding(self):
         return 0
